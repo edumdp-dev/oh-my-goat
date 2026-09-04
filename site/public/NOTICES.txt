@@ -1,0 +1,46 @@
+OhMyGoat landing site — third-party notices
+=============================================
+
+This page bundles or depends on the following third-party works.
+Full license texts: https://github.com/edumdp-dev/oh-my-goat (LICENSE)
+and the package registries linked below.
+
+1. Fonts (SIL Open Font License 1.1)
+-------------------------------------
+- Space Grotesk (display type)
+  Copyright: Florian Karsten. https://fonts.google.com/specimen/Space+Grotesk
+  npm: @fontsource/space-grotesk. License: OFL-1.1.
+- IBM Plex Sans (body type)
+  Copyright: IBM Corp. https://www.ibm.com/plex/
+  npm: @fontsource/ibm-plex-sans. License: OFL-1.1.
+- IBM Plex Mono (commands / metadata type)
+  Copyright: IBM Corp. https://www.ibm.com/plex/
+  npm: @fontsource/ibm-plex-mono. License: OFL-1.1.
+
+The SIL Open Font License 1.1 permits use, study, modification, and
+redistribution of the fonts. https://openfontlicense.org/
+
+2. Brand icons (Creative Commons Zero v1.0 Universal)
+------------------------------------------------------
+- simple-icons (X, GitHub, LinkedIn glyphs, rendered as currentColor SVG)
+  https://github.com/simple-icons/simple-icons — npm: simple-icons.
+  Each icon is a trademark of its respective owner; use here is subject
+  to the owners' brand guidelines. Icons are dedicated to the public
+  domain under CC0-1.0. https://creativecommons.org/publicdomain/zero/1.0/
+
+3. Libraries (MIT License)
+--------------------------
+- react, react-dom — Copyright Meta Platforms, Inc. and affiliates.
+  https://github.com/facebook/react — MIT.
+- vite, @vitejs/plugin-react — Copyright Evan You and contributors.
+  https://github.com/vitejs/vite — MIT.
+
+4. Toolchain (Apache License 2.0)
+---------------------------------
+- typescript — Copyright Microsoft Corporation.
+  https://github.com/microsoft/TypeScript — Apache-2.0.
+
+OhMyGoat itself is an independent public fork of Oh My Pi
+(can1357/oh-my-pi, base v18.1.8), which descends from Pi by Mario Zechner.
+OhMyGoat is released under the MIT license and is not affiliated with
+Stencil Labs.

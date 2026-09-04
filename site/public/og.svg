@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#04070E"/>
+  <g fill="none" stroke="#39A7FF" stroke-width="10" stroke-linecap="round" opacity="0.35">
+    <path d="M0 120 C 200 100, 400 140, 600 110 S 1000 90, 1200 120"/>
+    <path d="M0 220 C 200 200, 400 240, 600 210 S 1000 190, 1200 220"/>
+    <path d="M0 320 C 200 300, 400 340, 600 310 S 1000 290, 1200 320"/>
+    <path d="M0 420 C 200 400, 400 440, 600 410 S 1000 390, 1200 420"/>
+    <path d="M0 520 C 200 500, 400 540, 600 510 S 1000 490, 1200 520"/>
+  </g>
+  <g fill="none" stroke-linecap="round">
+    <path d="M180 470 C 190 360, 200 280, 260 200" stroke="#39A7FF" stroke-width="22"/>
+    <path d="M380 470 C 370 360, 360 280, 300 200" stroke="#8FE6FF" stroke-width="22"/>
+  </g>
+  <circle cx="280" cy="470" r="16" fill="#E9F1FF"/>
+  <text x="460" y="300" font-family="sans-serif" font-size="96" font-weight="bold" letter-spacing="6" fill="#E9F1FF">OHMYGOAT</text>
+  <text x="464" y="360" font-family="monospace" font-size="36" fill="#39A7FF">v0.0.1 · made by dudu</text>
+  <text x="464" y="420" font-family="sans-serif" font-size="32" fill="#A6BAD6">Your terminal agent. Tuned for the herd.</text>
+</svg>
