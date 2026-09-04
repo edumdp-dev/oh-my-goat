@@ -9,11 +9,6 @@ name: OhMyGoat CI
   push:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      ref:
-        description: "Additional ref note for manual dispatches (run ref is used)"
-        required: false
-        type: string
 
 permissions:
   contents: read
@@ -38,6 +33,10 @@ jobs:
           bun-version: "1.4"
       - name: Install dependencies (frozen)
         run: bun install --frozen-lockfile
+      - name: Stage locked native addon (linux-x64)
+        run: bun scripts/ohmg-fetch-natives.ts --tag linux-x64
+      - name: Type check workspace
+        run: bun run ci:check:full
       - name: Brand / updater / splash focused tests
         run: |
           set -euo pipefail
