@@ -112,8 +112,12 @@ jobs:
             gh issue edit "$EXISTING" --body "$BODY"
             gh issue comment "$EXISTING" --body "Re-reported for upstream commit \`${SHA}\`."
           else
-            gh issue create --title "Upstream sync conflict" --label upstream-conflict --body "$BODY"
+            gh issue create --title "Upstream sync conflict" --body "$BODY"
           fi
+          # Same label-lookup race class as the PR path: label tolerantly, never abort.
+          CONFLICT_ISSUE="${EXISTING:-$(gh issue list --title "Upstream sync conflict" --state open --json number --jq '.[0].number // empty' 2>/dev/null || true)}"
+          [ -n "$CONFLICT_ISSUE" ] && gh issue edit "$CONFLICT_ISSUE" --add-label upstream-conflict \
+            || echo "::warning::could not add upstream-conflict label"
           echo "::error::upstream sync conflicts with $SHA"
           exit 1
 
