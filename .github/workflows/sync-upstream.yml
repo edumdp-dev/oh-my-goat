@@ -148,8 +148,12 @@ jobs:
           if [ -n "$EXISTING" ]; then
             gh pr edit "$EXISTING" --title "chore: sync can1357/oh-my-pi main" --body "$BODY"
           else
-            gh pr create --base main --head "$SYNC_BRANCH" --title "chore: sync can1357/oh-my-pi main" --body "$BODY" --label upstream-sync
+            gh pr create --base main --head "$SYNC_BRANCH" --title "chore: sync can1357/oh-my-pi main" --body "$BODY"
           fi
+          # Label assignment must never abort the sync: a lookup race against a
+          # freshly created label has returned "not found" and failed the step.
+          gh pr edit "$SYNC_BRANCH" --add-label upstream-sync \
+            || echo "::warning::could not add upstream-sync label to the sync PR"
 
       - name: Dispatch OhMyGoat CI on the sync branch
         if: steps.merge.outputs.merged == 'true' && env.nothing_to_push != 'true'
