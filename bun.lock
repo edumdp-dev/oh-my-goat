@@ -77,7 +77,7 @@
       "name": "@oh-my-pi/pi-coding-agent",
       "version": "18.1.8",
       "bin": {
-        "omp": "src/cli.ts",
+        "ohmg": "src/cli.ts",
       },
       "dependencies": {
         "@babel/parser": "catalog:",

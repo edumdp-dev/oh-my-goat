@@ -1,97 +1,99 @@
+# OhMyGoat
+
 <p align="center">
-  <img src="https://github.com/can1357/oh-my-pi/blob/main/assets/hero.png?raw=true" alt="omp">
+  <strong>ohmygoat v0.0.1 · made by dudu</strong><br/>
+  A blue-tuned public fork of <a href="https://github.com/can1357/oh-my-pi">Oh My Pi</a> — same engine, own identity.
 </p>
 
 <p align="center">
-  <strong>A coding agent with the IDE wired in.</strong>
-  <strong><a href="https://omp.sh">omp.sh</a></strong>
+  <a href="https://ohmygoat.vercel.app"><img src="https://img.shields.io/badge/website-ohmygoat.vercel.app-39A7FF?style=flat&colorA=222222" alt="Website"></a>
+  <a href="https://github.com/edumdp-dev/oh-my-goat/releases/tag/ohmg-v0.0.1"><img src="https://img.shields.io/github/v/release/edumdp-dev/oh-my-goat?label=ohmg&color=8FE6FF&style=flat&colorA=222222" alt="OhMyGoat release"></a>
+  <a href="https://github.com/edumdp-dev/oh-my-goat/actions/workflows/ohmg-ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/edumdp-dev/oh-my-goat/ohmg-ci.yml?label=OhMyGoat%20CI&color=3FB950&style=flat&colorA=222222" alt="OhMyGoat CI"></a>
+  <a href="https://github.com/edumdp-dev/oh-my-goat/blob/main/LICENSE"><img src="https://img.shields.io/github/license/edumdp-dev/oh-my-goat?style=flat&colorA=222222&colorB=58A6FF" alt="License"></a>
 </p>
 
-<p align="center">
-  <a href="https://www.npmjs.com/package/@oh-my-pi/pi-coding-agent"><img src="https://img.shields.io/npm/v/@oh-my-pi/pi-coding-agent?style=flat&colorA=222222&colorB=CB3837" alt="npm version"></a>
-  <a href="https://github.com/can1357/oh-my-pi/blob/main/packages/coding-agent/CHANGELOG.md"><img src="https://img.shields.io/badge/changelog-keep-E05735?style=flat&colorA=222222" alt="Changelog"></a>
-  <a href="https://github.com/can1357/oh-my-pi/actions"><img src="https://img.shields.io/github/actions/workflow/status/can1357/oh-my-pi/ci.yml?style=flat&colorA=222222&colorB=3FB950" alt="CI"></a>
-  <a href="https://github.com/can1357/oh-my-pi/blob/main/LICENSE"><img src="https://img.shields.io/github/license/can1357/oh-my-pi?style=flat&colorA=222222&colorB=58A6FF" alt="License"></a>
-  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat&colorA=222222&logo=typescript&logoColor=white" alt="TypeScript"></a>
-  <a href="https://www.rust-lang.org"><img src="https://img.shields.io/badge/Rust-DEA584?style=flat&colorA=222222&logo=rust&logoColor=white" alt="Rust"></a>
-  <a href="https://bun.sh"><img src="https://img.shields.io/badge/runtime-Bun-f472b6?style=flat&colorA=222222" alt="Bun"></a>
-  <a href="https://discord.gg/4NMW9cdXZa"><img src="https://img.shields.io/badge/Discord-5865F2?style=flat&colorA=222222&logo=discord&logoColor=white" alt="Discord"></a>
-</p>
+> **Independent public fork; not affiliated with Stencil Labs.**
+> Lineage: [Pi](https://github.com/badlogic/pi-mono) by [Mario Zechner](https://github.com/mariozechner) → [Oh My Pi](https://github.com/can1357/oh-my-pi) by [Can Bölük](https://github.com/can1357) / Stencil Labs → **OhMyGoat** by Eduardo M. D. P.
 
-<p align="center">
-  Fork of <a href="https://github.com/badlogic/pi-mono">Pi</a> by <a href="https://github.com/mariozechner">@mariozechner</a> 
-</p>
+OhMyGoat keeps the full Oh My Pi tool surface and adds its own delta: a blue goat TUI
+identity, Dudu's portable model preset with **SnapCompact-first** compaction, a ready
+CommandCode model catalog, `ohmg` binaries for macOS / Linux / Windows (x64 + arm64), and
+an automated upstream-sync-by-PR pipeline. This is based on upstream
+`can1357/oh-my-pi@v18.1.8`; internal package names and versions still read `@oh-my-pi/*`
+`18.1.8` on purpose (upstream graph compatibility — they are not published from this fork).
 
-The most capable agent surface that ships. Continuously tuned by real-world use — complete out of the box, open all the way down.
+## Install (`ohmg`)
 
-**60+** providers · **31** built-in tools · **14** lsp ops · **28** dap ops · **~80k** lines of Rust core.
+### Verified — recommended (requires an authenticated GitHub CLI)
 
-> [!NOTE]
-> Pull requests are **temporarily open to everyone** as a trial. We previously
-> required a vouch before accepting PRs; that requirement is lifted for now
-> while we evaluate how open contributions go. Depending on the results, the
-> vouch system may return.
-
-## Install
-
-**macOS · Linux**
+**macOS / Linux**
 
 ```sh
-curl -fsSL https://omp.sh/install | sh
-```
-
-> **Alpine / musl:** the prebuilt musl binary links `libstdc++`/`libgcc` dynamically, which stock Alpine does not ship. Install them first: `apk add libstdc++ libgcc`.
-
-**Homebrew**
-
-```sh
-brew install can1357/tap/omp
-```
-
-**Bun (recommended)**
-
-```sh
-bun install -g @oh-my-pi/pi-coding-agent
-```
-
-**Nix**
-
-```sh
-# Run without installing
-nix run github:can1357/oh-my-pi
-
-# Or install into the active profile
-nix profile install github:can1357/oh-my-pi
-```
-
-Flake consumers can use `packages.<system>.omp`, `overlays.default`, `nixosModules.default`, or `homeManagerModules.default`. A Home Manager configuration can install OMP and own its settings declaratively:
-
-```nix
-{
-  inputs.omp.url = "github:can1357/oh-my-pi";
-
-  # In your Home Manager module:
-  imports = [ inputs.omp.homeManagerModules.default ];
-  programs.omp = {
-    enable = true;
-    settings.startup.quiet = true;
-  };
-}
+curl -fSLO https://github.com/edumdp-dev/oh-my-goat/releases/download/ohmg-v0.0.1/install.sh
+gh attestation verify install.sh --repo edumdp-dev/oh-my-goat \
+  --signer-workflow edumdp-dev/oh-my-goat/.github/workflows/release-ohmg.yml \
+  --source-ref refs/tags/ohmg-v0.0.1 --deny-self-hosted-runners
+sh install.sh
 ```
 
 **Windows (PowerShell)**
 
 ```powershell
-irm https://omp.sh/install.ps1 | iex
+irm https://github.com/edumdp-dev/oh-my-goat/releases/download/ohmg-v0.0.1/install.ps1 -OutFile install.ps1
+gh attestation verify install.ps1 --repo edumdp-dev/oh-my-goat `
+  --signer-workflow edumdp-dev/oh-my-goat/.github/workflows/release-ohmg.yml `
+  --source-ref refs/tags/ohmg-v0.0.1 --deny-self-hosted-runners
+& ([scriptblock]::Create((Get-Content .\install.ps1 -Raw)))
 ```
 
-**Pinned versions (mise)**
+### Quick — convenience only (no independent verification)
 
 ```sh
-mise use -g github:can1357/oh-my-pi
+# macOS / Linux
+curl -fsSL https://ohmygoat.vercel.app/install | sh
 ```
 
-macOS · Linux · Windows · bun ≥ 1.3.14
+```powershell
+# Windows PowerShell
+irm https://ohmygoat.vercel.app/install.ps1 | iex
+```
+
+Both paths resolve the protected tag `ohmg-v0.0.1` (never the mutable `main` branch),
+validate assets against `SHA256SUMS.txt` before any atomic replacement, and smoke-test the
+installed binary (`ohmg --version` must print `ohmg/0.0.1`).
+
+## Configuration
+
+- Config dir: `~/.ohmg/agent` on macOS/Linux, `%USERPROFILE%\.ohmg\agent` on Windows —
+  isolated from `~/.omp`; OhMyGoat never reads or writes the upstream config dir.
+- First install seeds `config.yml` (Dudu's preset: model roles, retry fallback chains,
+  `compaction.methodOrder` starting with `snapcompact`) and `models.yml` (CommandCode
+  catalog) **only when absent** — reinstalls never overwrite your choices.
+- CommandCode models activate when you export `COMMANDCODE_API_KEY`; no default model role
+  requires it.
+- `ohmg` continues to honor the inherited `OMP_*` / `PI_*` environment variables for
+  compatibility.
+
+## Upstream sync policy
+
+`.github/workflows/sync-upstream.yml` merges `can1357/oh-my-pi` main daily into a single
+reviewable PR (label `upstream-sync`) — never auto-merged. Conflicts abort the push and
+open/update an `upstream-conflict` issue instead of guessing. Downstream-owned regions
+(brand/TUI, packaging presets, updater, installers, native lock, site) are never resolved
+automatically, and upstream workflow files cannot silently gain execution here (import
+guard + disabled inherited workflows).
+
+## Signing limitations
+
+macOS binaries are **ad-hoc signed and not notarized**; Windows binaries are **unsigned**
+(no Authenticode). Expect Gatekeeper / SmartScreen prompts. Every release asset carries a
+GitHub build-provenance attestation, and there are no npm / Homebrew / Mise channels for
+OhMyGoat.
+
+> Everything below this line is the inherited Oh My Pi documentation, kept intact to
+> credit upstream and minimize merge conflicts. Where it says `omp`, read `ohmg`; where
+> it links `omp.sh`, the OhMyGoat equivalents are [ohmygoat.vercel.app](https://ohmygoat.vercel.app)
+> and this repository.
 
 ### Shell completions
 

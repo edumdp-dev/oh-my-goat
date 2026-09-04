@@ -1,0 +1,9 @@
+# OhMyGoat downstream-owned paths. All reviews route to @edumdp-dev.
+/.github/	@edumdp-dev
+/scripts/install.sh	@edumdp-dev
+/scripts/install.ps1	@edumdp-dev
+/packages/coding-agent/src/cli/update-cli.ts	@edumdp-dev
+/packages/coding-agent/scripts/build-binary.ts	@edumdp-dev
+/scripts/ci-release-build-binaries.ts	@edumdp-dev
+/packaging/	@edumdp-dev
+/packages/natives/package.json	@edumdp-dev

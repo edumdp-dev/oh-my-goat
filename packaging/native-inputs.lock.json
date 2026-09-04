@@ -1,0 +1,31 @@
+{
+	"$comment": "OhMyGoat native input lock (downstream-owned). Pins the exact MIT npm tarballs the release workflow installs as build inputs. Any change requires CODEOWNER review; upstream syncs never auto-select a native version. The workflow rejects divergence between this file and packages/natives/package.json (version) and the six package names below.",
+	"registry": "https://registry.npmjs.org",
+	"version": "18.1.8",
+	"packages": {
+		"linux-x64": {
+			"name": "@oh-my-pi/pi-natives-linux-x64",
+			"integrity": "sha512-pzXA7iwpMbh5rZVS2Tp6F9q6bzrMBHXsu2HASd3Z+6d95X8JWNnVlYdZkVEZNeYzL2Ll2Brx28AM6qTSz26y9g=="
+		},
+		"linux-arm64": {
+			"name": "@oh-my-pi/pi-natives-linux-arm64",
+			"integrity": "sha512-mO0VCLHeUCjVNgzuI10aOIVtgapAYT9L8ic0gDMhQAnCTBF5vFmmc3p1+JY6v9pHp948p6MMB5lNiSajNNWdVQ=="
+		},
+		"darwin-x64": {
+			"name": "@oh-my-pi/pi-natives-darwin-x64",
+			"integrity": "sha512-xYQ4XHEh3Z/lEUa+t51L/HRTtPrTcwOjkd0LTK1OFmbiDVymSOg4NUJxNYanCkxtUGlnE02EEEMpTo0SZuWsFQ=="
+		},
+		"darwin-arm64": {
+			"name": "@oh-my-pi/pi-natives-darwin-arm64",
+			"integrity": "sha512-VoVotzvQTRQ/FTX7KjfkCAvPwHCejehU5DGrR3275F2CwB6X53qykVvMkyCrBEGeQGAFPb5bc0LUNCRrpf4FMg=="
+		},
+		"win32-x64": {
+			"name": "@oh-my-pi/pi-natives-win32-x64",
+			"integrity": "sha512-YeoWwdREbGUxwbvSMGA8PAn1yHMw4Ka5VB3BNq36dk+hvNdpxIpMAInIz/6ajqurcck7Y4XpwXqvVIApzAJyoQ=="
+		},
+		"win32-arm64": {
+			"name": "@oh-my-pi/pi-natives-win32-arm64",
+			"integrity": "sha512-Na22Bn8chPphhWDyKMHZzsBleszM4NkkTTN4J7K+9K2IbiW/rmyq+JBCJjz+c7Q+MJP8brsBHRv9DjOmI0Y8kA=="
+		}
+	}
+}

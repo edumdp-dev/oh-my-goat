@@ -1,0 +1,61 @@
+name: OhMyGoat CI
+
+# Downstream validation gate. Produces the required status check
+# "OhMyGoat CI / verify". Read-only: no secrets, no write permissions, and
+# never a `pull_request_target` trigger. All actions pinned to full SHAs.
+
+"on":
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Additional ref note for manual dispatches (run ref is used)"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "ohmg-ci-${{ github.event_name }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: "1.4"
+      - name: Install dependencies (frozen)
+        run: bun install --frozen-lockfile
+      - name: Brand / updater / splash focused tests
+        run: |
+          set -euo pipefail
+          bun test \
+            packages/coding-agent/test/startup-composer.test.ts \
+            packages/coding-agent/test/startup-splash.test.ts \
+            packages/coding-agent/test/setup-wizard.test.ts \
+            packages/coding-agent/test/status-line-brand-fade.test.ts \
+            packages/coding-agent/test/theme-nerd-symbols.test.ts \
+            packages/coding-agent/test/terminal-title-state.test.ts \
+            packages/coding-agent/test/title-generator.test.ts
+          bun test packages/coding-agent/test/update-cli.test.ts packages/coding-agent/test/cli/update-cli.test.ts
+          bun test packages/coding-agent/test/welcome-history-resize.test.ts packages/coding-agent/test/welcome-tip.test.ts
+          bun test packages/coding-agent/test/discovery/omp-plugins.test.ts packages/coding-agent/test/marketplace/manager.test.ts
+      - name: CLI smoke
+        run: bun run ci:test:smoke
+      - name: Landing site build
+        run: |
+          set -euo pipefail
+          bun --cwd site install --frozen-lockfile
+          bun --cwd site run build

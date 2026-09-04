@@ -1,9 +1,9 @@
 {
-	"name": "omp",
+	"name": "ohmygoat",
 	"private": true,
-	"homepage": "https://omp.sh",
+	"homepage": "https://ohmygoat.vercel.app",
 	"license": "MIT",
-	"author": "Stencil Labs, Inc.",
+	"author": "Eduardo M. D. P.",
 	"workspaces": {
 		"packages": [
 			"packages/*",
