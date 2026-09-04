@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
+import { createHash } from "node:crypto";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -46,29 +47,34 @@ describe("musl release artifacts", () => {
 
 		expect(result.exitCode, result.stderr).toBe(0);
 		expect(result.stdout).toContain(
-			"Bun.build target=bun-linux-x64-musl-baseline outfile=packages/coding-agent/binaries/omp-linux-musl-x64",
+			"Bun.build target=bun-linux-x64-musl-baseline outfile=packages/coding-agent/binaries/ohmg-linux-musl-x64",
 		);
 		expect(result.stdout).toContain(
-			"Bun.build target=bun-linux-arm64-musl outfile=packages/coding-agent/binaries/omp-linux-musl-arm64",
+			"Bun.build target=bun-linux-arm64-musl outfile=packages/coding-agent/binaries/ohmg-linux-musl-arm64",
 		);
 	});
 
 	test("selects the musl asset when the Linux host reports musl", async () => {
-		const dir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-musl-install-"));
+		const dir = await fs.mkdtemp(path.join(os.tmpdir(), "ohmg-musl-install-"));
 		tempDirs.push(dir);
 		const binDir = path.join(dir, "bin");
 		const installDir = path.join(dir, "install");
 		await fs.mkdir(binDir);
 		await writeExecutable(binDir, "uname", '#!/bin/sh\n[ "$1" = "-s" ] && echo Linux || echo x86_64\n');
 		await writeExecutable(binDir, "ldd", "#!/bin/sh\necho 'musl libc (x86_64)'\n");
+		const binaryContent = '#!/bin/sh\necho "ohmg v0.0.1"\n';
+		const binaryDigest = createHash("sha256").update(binaryContent).digest("hex");
 		await writeExecutable(
 			binDir,
 			"curl",
 			`#!/bin/sh
 case "$*" in
-  *api.github.com*) echo '{"tag_name":"v1.0.0","mentions_count":0}' ;;
+  *SHA256SUMS.txt*) while [ "$#" -gt 0 ]; do
+       [ "$1" = "-o" ] && { printf '%b' '${binaryDigest}  ohmg-linux-musl-x64\\n' > "$2"; exit 0; }
+       shift
+     done ;;
   *) while [ "$#" -gt 0 ]; do
-       [ "$1" = "-o" ] && { printf '%s\n' '#!/bin/sh' 'echo "omp v1.0.0"' > "$2"; exit 0; }
+       [ "$1" = "-o" ] && { printf '%b' '#!/bin/sh\\necho "ohmg v0.0.1"\\n' > "$2"; exit 0; }
        shift
      done ;;
 esac
@@ -83,8 +89,9 @@ esac
 		});
 
 		expect(result.exitCode, result.stderr).toBe(0);
-		expect(result.stdout).toContain("Using version: v1.0.0");
-		expect(result.stdout).toContain("Downloading omp-linux-musl-x64...");
-		expect(await Bun.file(path.join(installDir, "omp")).text()).toBe('#!/bin/sh\necho "omp v1.0.0"\n');
+		expect(result.stdout).toContain("Using version: ohmg-v0.0.1");
+		expect(result.stdout).toContain("Downloading ohmg-linux-musl-x64...");
+		expect(result.stdout).toContain("Checksum OK");
+		expect(await Bun.file(path.join(installDir, "ohmg")).text()).toBe(binaryContent);
 	});
 });

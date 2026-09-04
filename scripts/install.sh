@@ -1,17 +1,21 @@
 #!/bin/sh
 set -e
 
-# OMP Coding Agent Installer
-# Usage: curl -fsSL https://raw.githubusercontent.com/can1357/oh-my-pi/main/scripts/install.sh | sh
+# OhMyGoat Coding Agent Installer
+# Usage: curl -fSLO https://github.com/edumdp-dev/oh-my-goat/releases/download/ohmg-v0.0.1/install.sh
+#        (verify first with: gh attestation verify install.sh --repo edumdp-dev/oh-my-goat --signer-workflow edumdp-dev/oh-my-goat/.github/workflows/release-ohmg.yml --source-ref refs/tags/ohmg-v0.0.1 --deny-self-hosted-runners)
+#        then: sh install.sh
+#        or quick: curl -fsSL https://ohmygoat.vercel.app/install | sh
 #
 # Options:
 #   --source       Install via bun (installs bun if needed)
-#   --binary       Always install prebuilt binary
-#   --ref <ref>    Install specific tag/commit/branch
+#   --binary       Install prebuilt binary (default)
+#   --ref <ref>    Install specific release tag (default: ohmg-v0.0.1)
 #   -r <ref>       Shorthand for --ref
 
-REPO="can1357/oh-my-pi"
-PACKAGE="@oh-my-pi/pi-coding-agent"
+REPO="edumdp-dev/oh-my-goat"
+DEFAULT_TAG="ohmg-v0.0.1"
+BIN_NAME="ohmg"
 INSTALL_DIR="${PI_INSTALL_DIR:-$HOME/.local/bin}"
 MIN_BUN_VERSION="1.3.14"
 
@@ -61,10 +65,6 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-# If a ref is provided, default to source install
-if [ -n "$REF" ] && [ -z "$MODE" ]; then
-    MODE="source"
-fi
 
 # Check if bun is available
 has_bun() {
@@ -174,45 +174,85 @@ has_git_lfs() {
 # Install via bun
 install_via_bun() {
     echo "Installing via bun..."
+    if ! has_git; then
+        echo "git is required when installing from source"
+        exit 1
+    fi
+
+    TMP_DIR="$(mktemp -d)"
+    trap 'rm -rf "$TMP_DIR"' EXIT
+
     if [ -n "$REF" ]; then
-        if ! has_git; then
-            echo "git is required for --ref when installing from source"
-            exit 1
-        fi
-
-        TMP_DIR="$(mktemp -d)"
-        trap 'rm -rf "$TMP_DIR"' EXIT
-
         if git clone --depth 1 --branch "$REF" "https://github.com/${REPO}.git" "$TMP_DIR" >/dev/null 2>&1; then
             :
         else
             git clone "https://github.com/${REPO}.git" "$TMP_DIR"
             (cd "$TMP_DIR" && git checkout "$REF")
         fi
-
-        # Pull LFS files
-        if has_git_lfs; then
-            (cd "$TMP_DIR" && git lfs pull)
-        fi
-
-        if [ ! -d "$TMP_DIR/packages/coding-agent" ]; then
-            echo "Expected package at ${TMP_DIR}/packages/coding-agent"
-            exit 1
-        fi
-
-        bun install -g "$TMP_DIR/packages/coding-agent" || {
-            echo "Failed to install from source"
-            exit 1
-        }
     else
-        bun install -g "$PACKAGE" || {
-            echo "Failed to install $PACKAGE"
+        git clone --depth 1 "https://github.com/${REPO}.git" "$TMP_DIR" || {
+            echo "Failed to clone ${REPO}"
             exit 1
         }
     fi
+
+    # Pull LFS files
+    if has_git_lfs; then
+        (cd "$TMP_DIR" && git lfs pull)
+    fi
+
+    if [ ! -d "$TMP_DIR/packages/coding-agent" ]; then
+        echo "Expected package at ${TMP_DIR}/packages/coding-agent"
+        exit 1
+    fi
+
+    bun install -g "$TMP_DIR/packages/coding-agent" || {
+        echo "Failed to install from source"
+        exit 1
+    }
     echo ""
-    echo "✓ Installed omp via bun"
-    echo "Run 'omp' to get started!"
+    echo "✓ Installed ${BIN_NAME} via bun"
+    echo "Run '${BIN_NAME}' to get started!"
+}
+
+# Print the SHA-256 hex digest of a file using whatever tool the host has.
+hash_file() {
+    if command -v sha256sum >/dev/null 2>&1; then
+        sha256sum "$1" | awk '{print $1}'
+    elif command -v shasum >/dev/null 2>&1; then
+        shasum -a 256 "$1" | awk '{print $1}'
+    else
+        echo "No SHA-256 tool found (need sha256sum or shasum)" >&2
+        return 1
+    fi
+}
+
+# Download a release asset to a destination that must not already exist.
+# Never overwrites: re-installs keep the user's own files untouched.
+seed_preset() {
+    SEED_TAG="$1"; SEED_ASSET="$2"; SEED_DEST="$3"
+    if [ -e "$SEED_DEST" ]; then
+        echo "Keeping existing $(basename "$SEED_DEST")"
+        return 0
+    fi
+    echo "Seeding $(basename "$SEED_DEST") from release ${SEED_TAG}..."
+    SEED_TMP="${SEED_DEST}.part"
+    if ! curl -fsSL --connect-timeout 10 --max-time 60 "https://github.com/${REPO}/releases/download/${SEED_TAG}/${SEED_ASSET}" -o "$SEED_TMP"; then
+        echo "Warning: could not seed $(basename "$SEED_DEST"); ${BIN_NAME} will create defaults on first run."
+        rm -f "$SEED_TMP"
+        return 0
+    fi
+    # Presets are attested release assets too: never seed an unverified file.
+    SEED_EXPECTED="$(grep -F "  ${SEED_ASSET}" "$SUMS_FILE" | awk '{print $1}' || true)"
+    if [ -n "$SEED_EXPECTED" ]; then
+        SEED_ACTUAL="$(hash_file "$SEED_TMP" || true)"
+        if [ "$SEED_ACTUAL" != "$SEED_EXPECTED" ]; then
+            echo "Warning: checksum mismatch for ${SEED_ASSET}; not seeding." >&2
+            rm -f "$SEED_TMP"
+            return 0
+        fi
+    fi
+    mv -f "$SEED_TMP" "$SEED_DEST"
 }
 
 # Install binary from GitHub releases
@@ -238,64 +278,102 @@ install_binary() {
         fi
     fi
 
-    BINARY="omp-${PLATFORM}-${ARCH}"
-    # Get release tag
-    if [ -n "$REF" ]; then
-        echo "Fetching release $REF..."
-        if RELEASE_JSON=$(curl -fsSL --connect-timeout 10 --max-time 60 "https://api.github.com/repos/${REPO}/releases/tags/${REF}"); then
-            LATEST=$(echo "$RELEASE_JSON" | grep '"tag_name"' | sed -E 's/.*"tag_name"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')
-        else
-            echo "Release tag not found: $REF"
-            echo "For branch/commit installs, use --source with --ref."
-            exit 1
-        fi
-    else
-        echo "Fetching latest release..."
-        RELEASE_JSON=$(curl -fsSL --connect-timeout 10 --max-time 60 "https://api.github.com/repos/${REPO}/releases/latest")
-        LATEST=$(echo "$RELEASE_JSON" | grep '"tag_name"' | sed -E 's/.*"tag_name"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')
-    fi
+    BINARY="${BIN_NAME}-${PLATFORM}-${ARCH}"
+    OUT="${INSTALL_DIR}/${BIN_NAME}"
+    AGENT_DIR="$HOME/.ohmg/agent"
 
-    if [ -z "$LATEST" ]; then
-        echo "Failed to fetch release tag"
+    TAG="${REF:-$DEFAULT_TAG}"
+    echo "Using version: $TAG"
+
+    if ! command -v curl >/dev/null 2>&1; then
+        echo "curl is required to download the ${BIN_NAME} release"
         exit 1
     fi
-    echo "Using version: $LATEST"
 
     mkdir -p "$INSTALL_DIR"
-    # Download binary
-    BINARY_URL="https://github.com/${REPO}/releases/download/${LATEST}/${BINARY}"
-    echo "Downloading ${BINARY}..."
-    curl -fsSL --connect-timeout 10 --speed-limit 1024 --speed-time 30 "$BINARY_URL" -o "${INSTALL_DIR}/omp"
-    chmod +x "${INSTALL_DIR}/omp"
+    TMP_BIN="${OUT}.new-$$"
+    SUMS_FILE="$(mktemp)"
+    cleanup() { rm -f "$SUMS_FILE" "$TMP_BIN"; }
+    trap cleanup EXIT
 
-    # Verify the freshly installed binary can actually start before reporting
-    # success. Bun's musl-target binaries link libstdc++/libgcc dynamically,
-    # which stock Alpine/musl systems do not ship, so the download succeeds while
-    # the binary exits 127 with relocation errors. Never claim success for a
-    # binary that cannot run.
-    if ! SMOKE_OUTPUT="$("${INSTALL_DIR}/omp" --version 2>&1)"; then
+    # Resolve the release's checksum manifest first: the asset must be listed
+    # there, otherwise there is nothing safe to install (e.g. this release
+    # ships no musl asset, so a musl host stops here instead of fetching a
+    # binary that could never run).
+    SUMS_URL="https://github.com/${REPO}/releases/download/${TAG}/SHA256SUMS.txt"
+    echo "Fetching SHA256SUMS.txt for ${TAG}..."
+    if ! curl -fsSL --connect-timeout 10 --max-time 60 "$SUMS_URL" -o "$SUMS_FILE"; then
+        echo "Failed to download SHA256SUMS.txt for release $TAG"
+        echo "Check that the release exists: https://github.com/${REPO}/releases/tag/${TAG}"
+        exit 1
+    fi
+
+    EXPECTED="$(grep -F "  ${BINARY}" "$SUMS_FILE" | awk '{print $1}' || true)"
+    if [ -z "$EXPECTED" ]; then
+        echo "Release $TAG has no asset named $BINARY"
+        exit 1
+    fi
+
+    # Download to a temp path in the install dir and verify before anything
+    # is replaced, so a failed download can never break a working install.
+    BINARY_URL="https://github.com/${REPO}/releases/download/${TAG}/${BINARY}"
+    echo "Downloading ${BINARY}..."
+    curl -fsSL --connect-timeout 10 --speed-limit 1024 --speed-time 30 "$BINARY_URL" -o "$TMP_BIN"
+    chmod +x "$TMP_BIN"
+
+    ACTUAL="$(hash_file "$TMP_BIN" || true)"
+    if [ "$ACTUAL" != "$EXPECTED" ]; then
+        echo "Checksum mismatch for ${BINARY}:"
+        echo "  expected: $EXPECTED"
+        echo "  actual:   ${ACTUAL:-<unavailable>}"
+        echo "Aborting without touching the installed ${BIN_NAME}."
+        exit 1
+    fi
+    echo "Checksum OK"
+
+    # Smoke-test the download before it replaces anything: a binary that
+    # cannot start must never replace a working install.
+    if ! SMOKE_OUTPUT="$("$TMP_BIN" --version 2>&1)"; then
         echo ""
-        echo "✗ omp was downloaded to ${INSTALL_DIR}/omp but cannot start:"
+        echo "✗ ${BINARY} was downloaded but cannot start:"
         echo "$SMOKE_OUTPUT" | sed 's/^/    /'
         if [ "$PLATFORM" = "linux-musl" ]; then
             echo ""
-            echo "The musl build links libstdc++/libgcc dynamically. Install them, then re-run 'omp':"
-            if command -v apk >/dev/null 2>&1; then
-                echo "    apk add libstdc++ libgcc"
-            else
-                echo "    (install the libstdc++ and libgcc runtime packages for your distro)"
-            fi
+            echo "This release ships glibc Linux binaries only; musl hosts are not covered."
         fi
+        exit 1
+    fi
+
+    # Atomic replacement, then a post-install smoke test on the final launcher.
+    mv -f "$TMP_BIN" "$OUT"
+    if ! SMOKE_OUTPUT="$("$OUT" --version 2>&1)"; then
+        echo ""
+        echo "✗ Installed ${OUT} but it cannot start:"
+        echo "$SMOKE_OUTPUT" | sed 's/^/    /'
         exit 1
     fi
 
     echo ""
-    echo "✓ Installed omp to ${INSTALL_DIR}/omp"
+    echo "✓ Installed ${BIN_NAME} (${SMOKE_OUTPUT}) to ${OUT}"
+
+    # Seed the portable preset and model catalog, but never overwrite the
+    # user's own files. Sources are the release assets pinned to this tag —
+    # never the main branch, never ~/.omp.
+    mkdir -p "$AGENT_DIR"
+    if [ ! -e "$AGENT_DIR/config.yml" ] && [ ! -e "$AGENT_DIR/config.yaml" ]; then
+        seed_preset "$TAG" "ohmygoat.config.yml" "$AGENT_DIR/config.yml"
+    else
+        echo "Keeping existing agent config"
+    fi
+    seed_preset "$TAG" "ohmygoat.models.yml" "$AGENT_DIR/models.yml"
+
+    trap - EXIT
+    cleanup
 
     # Check if in PATH
     case ":$PATH:" in
-        *":$INSTALL_DIR:"*) echo "Run 'omp' to get started!" ;;
-        *) echo "Add ${INSTALL_DIR} to your PATH, then run 'omp'" ;;
+        *":$INSTALL_DIR:"*) echo "Run '${BIN_NAME}' to get started!" ;;
+        *) echo "Add ${INSTALL_DIR} to your PATH, then run '${BIN_NAME}'" ;;
     esac
 }
 
@@ -319,16 +397,7 @@ case "$MODE" in
         install_binary
         ;;
     *)
-        # Default: use bun only when it matches the host architecture, otherwise
-        # fall back to the prebuilt binary so Rosetta bun can't force an x86_64 build.
-        if has_bun && bun_arch_matches_host; then
-            require_bun_version
-            install_via_bun
-        else
-            if has_bun; then
-                echo "Detected bun with architecture '$(bun_arch)' on a '$(host_arch)' host; using the prebuilt binary instead."
-            fi
-            install_binary
-        fi
+        # Default: install the prebuilt binary.
+        install_binary
         ;;
 esac
