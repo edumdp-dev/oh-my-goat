@@ -140,7 +140,7 @@ describe("update-cli binary-only target", () => {
 
 describe("parseProductTag", () => {
 	it("accepts ohmg-v<semver> tags", () => {
-		expect(parseProductTag("ohmg-v0.0.1")).toBe("0.0.1");
+		expect(parseProductTag("ohmg-v0.0.2")).toBe("0.0.2");
 	});
 
 	it("rejects upstream and malformed tags", () => {
@@ -165,11 +165,11 @@ describe("getLatestRelease fork resolution", () => {
 	it("resolves the fork's latest stable release as a binary dist", async () => {
 		const seen: string[] = [];
 		const release = await getLatestRelease({
-			fetchImpl: releaseFetch({ tag_name: "ohmg-v0.0.1", draft: false, prerelease: false }, seen),
+			fetchImpl: releaseFetch({ tag_name: "ohmg-v0.0.2", draft: false, prerelease: false }, seen),
 			githubToken: "",
 		});
 
-		expect(release).toEqual({ tag: "ohmg-v0.0.1", version: "0.0.1", dist: "binary" });
+		expect(release).toEqual({ tag: "ohmg-v0.0.2", version: "0.0.2", dist: "binary" });
 		expect(seen).toEqual([METADATA_URL]);
 	});
 
@@ -179,7 +179,7 @@ describe("getLatestRelease fork resolution", () => {
 		const fetchImpl = async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
 			seen.push(String(input));
 			authHeaders.push(new Headers(init?.headers).get("Authorization"));
-			return Response.json({ tag_name: "ohmg-v0.0.1", draft: false, prerelease: false });
+			return Response.json({ tag_name: "ohmg-v0.0.2", draft: false, prerelease: false });
 		};
 
 		await getLatestRelease({ fetchImpl, githubToken: "test-token" });
@@ -199,7 +199,7 @@ describe("getLatestRelease fork resolution", () => {
 		const seen: string[] = [];
 		await expect(
 			getLatestRelease({
-				fetchImpl: releaseFetch({ tag_name: "ohmg-v0.0.2", draft: false, prerelease: true }, seen),
+				fetchImpl: releaseFetch({ tag_name: "ohmg-v0.0.3", draft: false, prerelease: true }, seen),
 			}),
 		).rejects.toThrow("prerelease");
 	});
@@ -207,7 +207,7 @@ describe("getLatestRelease fork resolution", () => {
 	it("reports that no canary channel exists without any network request", async () => {
 		const seen: string[] = [];
 		await expect(
-			getLatestRelease({ channel: "canary", fetchImpl: releaseFetch({ tag_name: "ohmg-v0.0.1" }, seen) }),
+			getLatestRelease({ channel: "canary", fetchImpl: releaseFetch({ tag_name: "ohmg-v0.0.2" }, seen) }),
 		).rejects.toThrow("No canary channel exists");
 		expect(seen).toEqual([]);
 	});
@@ -221,7 +221,7 @@ describe("getLatestRelease fork resolution", () => {
 });
 
 describe("update-cli never contacts upstream", () => {
-	const tag = "ohmg-v0.0.1";
+	const tag = "ohmg-v0.0.2";
 	const binaries = [
 		"ohmg-darwin-x64",
 		"ohmg-darwin-arm64",
@@ -273,10 +273,10 @@ describe("update-cli never contacts upstream", () => {
 
 		const dir = await makeTempDir();
 		const targetPath = path.join(dir, "ohmg-linux-x64");
-		await updateViaBinaryAt(targetPath, "0.0.1", {
+		await updateViaBinaryAt(targetPath, "0.0.2", {
 			binaryName: "ohmg-linux-x64",
 			fetchImpl,
-			verifyInstalledVersion: async () => ({ ok: true, actual: "0.0.1", path: targetPath }),
+			verifyInstalledVersion: async () => ({ ok: true, actual: "0.0.2", path: targetPath }),
 		});
 
 		expect(seen).toHaveLength(2);
@@ -292,7 +292,7 @@ describe("update-cli never contacts upstream", () => {
 });
 
 describe("update-cli release binary integrity", () => {
-	const tag = "ohmg-v0.0.1";
+	const tag = "ohmg-v0.0.2";
 	const binaryName = "ohmg-linux-x64";
 	const url = `https://github.com/edumdp-dev/oh-my-goat/releases/download/${tag}/${binaryName}`;
 	const content = "verified binary";
@@ -473,7 +473,7 @@ describe("update-cli release binary integrity", () => {
 		const dir = await makeTempDir();
 		const targetPath = path.join(dir, binaryName);
 		const installed = "#!/bin/sh\necho ohmg/0.0.0\n";
-		const altered = "#!/bin/sh\necho ohmg/0.0.1\n";
+		const altered = "#!/bin/sh\necho ohmg/0.0.2\n";
 		const expectedDigest = `sha256:${createHash("sha256")
 			.update("x".repeat(Buffer.byteLength(altered)))
 			.digest("hex")}`;
@@ -502,7 +502,7 @@ describe("update-cli release binary integrity", () => {
 		Bun.env.GITHUB_TOKEN = "test-token";
 		try {
 			await expect(
-				updateViaBinaryAt(targetPath, "0.0.1", {
+				updateViaBinaryAt(targetPath, "0.0.2", {
 					binaryName,
 					fetchImpl,
 				}),
@@ -527,7 +527,7 @@ describe("update-cli release binary integrity", () => {
 		const fetchImpl = async () => new Response(null, { status: 403, statusText: "rate limit exceeded" });
 
 		await expect(
-			updateViaBinaryAt(targetPath, "0.0.1", {
+			updateViaBinaryAt(targetPath, "0.0.2", {
 				binaryName,
 				fetchImpl,
 				githubToken: "",
@@ -688,7 +688,7 @@ describe("update-cli stale update artifact sweep", () => {
 describe("update-cli fork release contract", () => {
 	it("pins asset URLs to the fork's ohmg-v tag", () => {
 		const binaryName = "ohmg-darwin-arm64";
-		const tag = "ohmg-v0.0.1";
+		const tag = "ohmg-v0.0.2";
 		const url = `https://github.com/edumdp-dev/oh-my-goat/releases/download/${tag}/${binaryName}`;
 		const digest = `sha256:${createHash("sha256").update("goat").digest("hex")}`;
 		expect(
@@ -707,7 +707,7 @@ describe("update-cli fork release contract", () => {
 
 	it("rejects an upstream-shaped download URL for a fork tag", () => {
 		const binaryName = "ohmg-linux-x64";
-		const tag = "ohmg-v0.0.1";
+		const tag = "ohmg-v0.0.2";
 		const digest = `sha256:${createHash("sha256").update("goat").digest("hex")}`;
 		expect(() =>
 			resolveReleaseBinaryAsset(
@@ -736,7 +736,7 @@ describe("update-cli script-shim takeover", () => {
 	// Tests that execute a text-file `ohmg.exe` stub are skipped on Windows:
 	// CreateProcess rejects them (error 193), so only POSIX hosts exercise the
 	// real spawn-and-verify path. Linux CI covers them fully.
-	const version = "0.0.1";
+	const version = "0.0.2";
 	const binaryName = "ohmg-windows-x64.exe";
 	const url = `https://github.com/edumdp-dev/oh-my-goat/releases/download/ohmg-v${version}/${binaryName}`;
 
@@ -867,7 +867,7 @@ describe("update-cli script-shim takeover", () => {
 					fetchImpl: makeFetch(exe),
 					githubToken: "test-token",
 				}),
-			).rejects.toThrow(/still reports 0\.0\.0 \(expected 0\.0\.1\); restored previous ohmg launcher/);
+			).rejects.toThrow(/still reports 0\.0\.0 \(expected 0\.0\.2\); restored previous ohmg launcher/);
 
 			expect(await Bun.file(path.join(dir, "ohmg.exe")).exists()).toBe(false);
 			for (const name in shims) {

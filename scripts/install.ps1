@@ -1,13 +1,13 @@
 # OhMyGoat Coding Agent Installer for Windows
-# Verify first: gh attestation verify install.ps1 --repo edumdp-dev/oh-my-goat --signer-workflow edumdp-dev/oh-my-goat/.github/workflows/release-ohmg.yml --source-ref refs/tags/ohmg-v0.0.1 --deny-self-hosted-runners
+# Verify first: gh attestation verify install.ps1 --repo edumdp-dev/oh-my-goat --signer-workflow edumdp-dev/oh-my-goat/.github/workflows/release-ohmg.yml --source-ref refs/tags/ohmg-v0.0.2 --deny-self-hosted-runners
 # Then run: & ([scriptblock]::Create((Get-Content .\install.ps1 -Raw)))
 # Or quick: irm https://ohmygoat.vercel.app/install.ps1 | iex
 #
 # Or with options:
 #   & ([scriptblock]::Create((Get-Content .\install.ps1 -Raw))) -Binary
 #   & ([scriptblock]::Create((Get-Content .\install.ps1 -Raw))) -Source
-#   & ([scriptblock]::Create((Get-Content .\install.ps1 -Raw))) -Source -Ref ohmg-v0.0.1
-#   & ([scriptblock]::Create((Get-Content .\install.ps1 -Raw))) -Binary -Ref ohmg-v0.0.1
+#   & ([scriptblock]::Create((Get-Content .\install.ps1 -Raw))) -Source -Ref ohmg-v0.0.2
+#   & ([scriptblock]::Create((Get-Content .\install.ps1 -Raw))) -Binary -Ref ohmg-v0.0.2
 
 param(
     [switch]$Source,
@@ -18,7 +18,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $Repo = "edumdp-dev/oh-my-goat"
-$DefaultTag = "ohmg-v0.0.1"
+$DefaultTag = "ohmg-v0.0.2"
 $InstallDir = if ($env:PI_INSTALL_DIR) { $env:PI_INSTALL_DIR } else { Join-Path $env:LOCALAPPDATA "ohmg" }
 $NativeArchitecture = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLowerInvariant()
 if ($NativeArchitecture -notin @("x64", "arm64")) {
@@ -235,6 +235,25 @@ function Install-ViaBun {
     Write-Host "Run 'ohmg' to get started!"
 }
 
+function Get-OhmgFileHash {
+    # SHA-256 hex digest of a file without depending on module autoload:
+    # Get-FileHash (Microsoft.PowerShell.Utility) failed to load on Windows
+    # PowerShell 5.1 in a constrained environment. Pure .NET, works on 5.1+
+    param([string]$Path)
+    $sha256 = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $stream = [System.IO.File]::OpenRead($Path)
+        try {
+            $hashBytes = $sha256.ComputeHash($stream)
+        } finally {
+            $stream.Close()
+        }
+    } finally {
+        $sha256.Dispose()
+    }
+    return ([System.BitConverter]::ToString($hashBytes)).Replace("-", "").ToLowerInvariant()
+}
+
 function Seed-Preset {
     param([string]$Tag, [string]$Asset, [string]$Destination, [string]$SumsPath)
     $leaf = Split-Path $Destination -Leaf
@@ -251,7 +270,7 @@ function Seed-Preset {
             $assetMatch = Select-String -Path $SumsPath -Pattern "  $Asset$" | Select-Object -First 1
             if ($assetMatch) {
                 $assetExpected = ($assetMatch.Line -split '\s+')[0].ToLowerInvariant()
-                $assetActual = (Get-FileHash -Path $tmp -Algorithm SHA256).Hash.ToLowerInvariant()
+                $assetActual = Get-OhmgFileHash -Path $tmp
                 if ($assetActual -ne $assetExpected) {
                     Write-Host "[WARN] Checksum mismatch for $Asset; not seeding." -ForegroundColor Yellow
                     return
@@ -300,7 +319,7 @@ function Install-Binary {
         Invoke-WebRequest -Uri $BinaryUrl -OutFile $TmpPath -TimeoutSec 900
         Unblock-File -Path $TmpPath -ErrorAction SilentlyContinue
 
-        $Actual = (Get-FileHash -Path $TmpPath -Algorithm SHA256).Hash.ToLowerInvariant()
+        $Actual = Get-OhmgFileHash -Path $TmpPath
         if ($Actual -ne $Expected.ToLowerInvariant()) {
             throw "Checksum mismatch for ${BinaryName}: expected $Expected, actual $Actual. Aborting without touching the installed ohmg."
         }

@@ -20,7 +20,7 @@ const en = {
   skipLink: "Skip to content",
   wordmark: "OHMYGOAT",
   navLabel: "Sections",
-  versionBadge: "v0.0.1",
+  versionBadge: "v0.0.2",
   navFeatures: "Features",
   navPreset: "Preset",
   navLineage: "Lineage",
@@ -49,7 +49,7 @@ const en = {
     "Convenience only, no independent verification. Pipes the installer straight from ohmygoat.vercel.app.",
   installHeading: "Install",
   installLede:
-    "Binaries for macOS and Windows from the ohmg-v0.0.1 release. The installer seeds ~/.ohmg/agent/config.yml and models.yml only when they do not exist — reinstalling never overwrites your choices.",
+    "Binaries for macOS and Windows from the ohmg-v0.0.2 release. The installer seeds ~/.ohmg/agent/config.yml and models.yml only when they do not exist — reinstalling never overwrites your choices.",
   presetNote:
     "Preset ships Dudu's model roles and SnapCompact-first compaction with no secrets. CommandCode stays ready via COMMANDCODE_API_KEY but is never the default.",
   copyLabel: "Copy",
@@ -74,7 +74,7 @@ const en = {
     {
       id: "goat",
       title: "Blue goat",
-      body: "A blue Braille goat replaces the π mark in the TUI, with a truecolor and ANSI-256 blue palette and the ohmygoat v0.0.1 · made by dudu title.",
+      body: "A blue Braille goat replaces the π mark in the TUI, with a truecolor and ANSI-256 blue palette and the ohmygoat v0.0.2 · made by dudu title.",
     },
     {
       id: "preset",
@@ -143,7 +143,7 @@ const en = {
 
   footerTagline: "made by dudu",
   footerLicenses: "Third-party notices",
-  footerRelease: "Release ohmg-v0.0.1",
+  footerRelease: "Release ohmg-v0.0.2",
   socialX: "X",
   socialGithub: "GitHub",
   socialLinkedin: "LinkedIn",
@@ -156,7 +156,7 @@ const pt: Strings = {
   skipLink: "Pular para o conteúdo",
   wordmark: "OHMYGOAT",
   navLabel: "Seções",
-  versionBadge: "v0.0.1",
+  versionBadge: "v0.0.2",
   navFeatures: "Recursos",
   navPreset: "Configuração",
   navLineage: "Origem",
@@ -186,7 +186,7 @@ const pt: Strings = {
     "Apenas conveniência, sem verificação independente. Canaliza o instalador direto de ohmygoat.vercel.app.",
   installHeading: "Instalação",
   installLede:
-    "Binários para macOS e Windows da release ohmg-v0.0.1. O instalador cria ~/.ohmg/agent/config.yml e models.yml somente quando não existem — reinstalar nunca sobrescreve suas escolhas.",
+    "Binários para macOS e Windows da release ohmg-v0.0.2. O instalador cria ~/.ohmg/agent/config.yml e models.yml somente quando não existem — reinstalar nunca sobrescreve suas escolhas.",
   presetNote:
     "O preset traz os model roles de Dudu e compactação SnapCompact-first sem segredos. CommandCode fica pronto via COMMANDCODE_API_KEY, mas nunca é o padrão.",
   copyLabel: "Copiar",
@@ -211,7 +211,7 @@ const pt: Strings = {
     {
       id: "goat",
       title: "Cabra azul",
-      body: "Uma cabra Braille azul substitui a marca π no TUI, com paleta azul truecolor e ANSI-256 e o título ohmygoat v0.0.1 · made by dudu.",
+      body: "Uma cabra Braille azul substitui a marca π no TUI, com paleta azul truecolor e ANSI-256 e o título ohmygoat v0.0.2 · made by dudu.",
     },
     {
       id: "preset",
@@ -280,7 +280,7 @@ const pt: Strings = {
 
   footerTagline: "made by dudu",
   footerLicenses: "Avisos de terceiros",
-  footerRelease: "Release ohmg-v0.0.1",
+  footerRelease: "Release ohmg-v0.0.2",
   socialX: "X",
   socialGithub: "GitHub",
   socialLinkedin: "LinkedIn",

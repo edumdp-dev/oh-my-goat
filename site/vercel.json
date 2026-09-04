@@ -6,12 +6,12 @@
   "redirects": [
     {
       "source": "/install",
-      "destination": "https://github.com/edumdp-dev/oh-my-goat/releases/download/ohmg-v0.0.1/install.sh",
+      "destination": "https://github.com/edumdp-dev/oh-my-goat/releases/download/ohmg-v0.0.2/install.sh",
       "permanent": false
     },
     {
       "source": "/install.ps1",
-      "destination": "https://github.com/edumdp-dev/oh-my-goat/releases/download/ohmg-v0.0.1/install.ps1",
+      "destination": "https://github.com/edumdp-dev/oh-my-goat/releases/download/ohmg-v0.0.2/install.ps1",
       "permanent": false
     }
   ],

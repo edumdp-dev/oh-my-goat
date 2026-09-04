@@ -21,7 +21,7 @@ name: OhMyGoat Release
         description: "Existing ohmg-v* tag to build and publish"
         required: true
         type: string
-        default: "ohmg-v0.0.1"
+        default: "ohmg-v0.0.2"
 
 permissions:
   contents: read

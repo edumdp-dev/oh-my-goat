@@ -12,16 +12,16 @@ type Method = "verified" | "quick";
 const COMMANDS: Record<OS, Record<Method, string[]>> = {
   mac: {
     verified: [
-      "curl -fSLO https://github.com/edumdp-dev/oh-my-goat/releases/download/ohmg-v0.0.1/install.sh",
-      "gh attestation verify install.sh --repo edumdp-dev/oh-my-goat --signer-workflow edumdp-dev/oh-my-goat/.github/workflows/release-ohmg.yml --source-ref refs/tags/ohmg-v0.0.1 --deny-self-hosted-runners",
+      "curl -fSLO https://github.com/edumdp-dev/oh-my-goat/releases/download/ohmg-v0.0.2/install.sh",
+      "gh attestation verify install.sh --repo edumdp-dev/oh-my-goat --signer-workflow edumdp-dev/oh-my-goat/.github/workflows/release-ohmg.yml --source-ref refs/tags/ohmg-v0.0.2 --deny-self-hosted-runners",
       "sh install.sh",
     ],
     quick: ["curl -fsSL https://ohmygoat.vercel.app/install | sh"],
   },
   win: {
     verified: [
-      "irm https://github.com/edumdp-dev/oh-my-goat/releases/download/ohmg-v0.0.1/install.ps1 -OutFile install.ps1",
-      "gh attestation verify install.ps1 --repo edumdp-dev/oh-my-goat --signer-workflow edumdp-dev/oh-my-goat/.github/workflows/release-ohmg.yml --source-ref refs/tags/ohmg-v0.0.1 --deny-self-hosted-runners",
+      "irm https://github.com/edumdp-dev/oh-my-goat/releases/download/ohmg-v0.0.2/install.ps1 -OutFile install.ps1",
+      "gh attestation verify install.ps1 --repo edumdp-dev/oh-my-goat --signer-workflow edumdp-dev/oh-my-goat/.github/workflows/release-ohmg.yml --source-ref refs/tags/ohmg-v0.0.2 --deny-self-hosted-runners",
       "& ([scriptblock]::Create((Get-Content .\\install.ps1 -Raw)))",
     ],
     quick: ["irm https://ohmygoat.vercel.app/install.ps1 | iex"],

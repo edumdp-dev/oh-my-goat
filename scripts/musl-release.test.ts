@@ -62,7 +62,7 @@ describe("musl release artifacts", () => {
 		await fs.mkdir(binDir);
 		await writeExecutable(binDir, "uname", '#!/bin/sh\n[ "$1" = "-s" ] && echo Linux || echo x86_64\n');
 		await writeExecutable(binDir, "ldd", "#!/bin/sh\necho 'musl libc (x86_64)'\n");
-		const binaryContent = '#!/bin/sh\necho "ohmg v0.0.1"\n';
+		const binaryContent = '#!/bin/sh\necho "ohmg v0.0.2"\n';
 		const binaryDigest = createHash("sha256").update(binaryContent).digest("hex");
 		await writeExecutable(
 			binDir,
@@ -74,7 +74,7 @@ case "$*" in
        shift
      done ;;
   *) while [ "$#" -gt 0 ]; do
-       [ "$1" = "-o" ] && { printf '%b' '#!/bin/sh\\necho "ohmg v0.0.1"\\n' > "$2"; exit 0; }
+       [ "$1" = "-o" ] && { printf '%b' '#!/bin/sh\\necho "ohmg v0.0.2"\\n' > "$2"; exit 0; }
        shift
      done ;;
 esac
@@ -89,7 +89,7 @@ esac
 		});
 
 		expect(result.exitCode, result.stderr).toBe(0);
-		expect(result.stdout).toContain("Using version: ohmg-v0.0.1");
+		expect(result.stdout).toContain("Using version: ohmg-v0.0.2");
 		expect(result.stdout).toContain("Downloading ohmg-linux-musl-x64...");
 		expect(result.stdout).toContain("Checksum OK");
 		expect(await Bun.file(path.join(installDir, "ohmg")).text()).toBe(binaryContent);

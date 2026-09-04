@@ -109,7 +109,7 @@ describe("renderWelcomeTip", () => {
 
 	it("renders the exact product title and all three responsive welcome regimes", () => {
 		const welcome = new WelcomeComponent(
-			"0.0.1",
+			"0.0.2",
 			"muse-spark-1.3-contributor",
 			"opencode-go",
 			[{ name: "prior work", timeAgo: "5m ago" }],
@@ -135,7 +135,7 @@ describe("renderWelcomeTip", () => {
 
 		for (const frame of frames.slice(2)) {
 			const plain = frame.lines.map(line => Bun.stripANSI(line));
-			expect(plain.join("\n")).toContain("ohmygoat v0.0.1 · made by dudu");
+			expect(plain.join("\n")).toContain("ohmygoat v0.0.2 · made by dudu");
 			expect(plain.join("\n")).toContain(GOAT_LOGO[6].trim());
 			expect(plain.findIndex(line => line.includes("Tips"))).toBeLessThan(
 				plain.findIndex(line => line.includes(GOAT_LOGO[6].trim())),

@@ -46,16 +46,16 @@ describe("getLatestRelease fork releases", () => {
 	}
 
 	it("resolves the fork's latest stable release without touching a registry", async () => {
-		const urls = stubReleases({ tag_name: "ohmg-v0.0.1", draft: false, prerelease: false });
+		const urls = stubReleases({ tag_name: "ohmg-v0.0.2", draft: false, prerelease: false });
 
 		const release = await getLatestRelease();
 
-		expect(release).toEqual({ tag: "ohmg-v0.0.1", version: "0.0.1", dist: "binary" });
+		expect(release).toEqual({ tag: "ohmg-v0.0.2", version: "0.0.2", dist: "binary" });
 		expect(urls).toEqual(["https://api.github.com/repos/edumdp-dev/oh-my-goat/releases/latest"]);
 	});
 
 	it("reports that no canary channel exists instead of querying one", async () => {
-		const urls = stubReleases({ tag_name: "ohmg-v0.0.1", draft: false, prerelease: false });
+		const urls = stubReleases({ tag_name: "ohmg-v0.0.2", draft: false, prerelease: false });
 
 		await expect(getLatestRelease({ channel: "canary" })).rejects.toThrow("No canary channel exists");
 		expect(urls).toEqual([]);
