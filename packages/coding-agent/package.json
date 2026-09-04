@@ -2,7 +2,7 @@
   "type": "module",
   "name": "@oh-my-pi/pi-coding-agent",
   "version": "18.1.8",
-  "description": "OhMyGoat: a blue-tuned Oh My Pi coding agent fork with Dudu's model preset, CommandCode catalog, and SnapCompact-first compaction",
+  "description": "OhMyGoat terminal coding agent (ohmg CLI): one-command install, curated model setup, long sessions that stay sharp",
   "homepage": "https://ohmygoat.vercel.app",
   "author": "Eduardo M. D. P.",
   "contributors": [

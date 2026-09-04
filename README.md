@@ -1,8 +1,8 @@
 # OhMyGoat
 
 <p align="center">
-  <strong>ohmygoat v0.0.3 · made by dudu</strong><br/>
-  A blue-tuned public fork of <a href="https://github.com/can1357/oh-my-pi">Oh My Pi</a> — same engine, own identity.
+  <strong>Install in minutes, code for hours.</strong><br/>
+  The terminal coding agent that ships ready to work.
 </p>
 
 <p align="center">
@@ -12,15 +12,17 @@
   <a href="https://github.com/edumdp-dev/oh-my-goat/blob/main/LICENSE"><img src="https://img.shields.io/github/license/edumdp-dev/oh-my-goat?style=flat&colorA=222222&colorB=58A6FF" alt="License"></a>
 </p>
 
-> **Independent public fork; not affiliated with Stencil Labs.**
-> Lineage: [Pi](https://github.com/badlogic/pi-mono) by [Mario Zechner](https://github.com/mariozechner) → [Oh My Pi](https://github.com/can1357/oh-my-pi) by [Can Bölük](https://github.com/can1357) / Stencil Labs → **OhMyGoat** by Eduardo M. D. P.
+One command installs the `ohmg` CLI on Windows or macOS. Models arrive
+preconfigured with automatic fallbacks, long sessions stay sharp instead of
+degrading, and your setup lives in plain YAML that reinstalls never touch.
+No configuration rabbit hole — you are shipping in minutes.
 
-OhMyGoat keeps the full Oh My Pi tool surface and adds its own delta: a blue goat TUI
-identity, Dudu's portable model preset with **SnapCompact-first** compaction, a ready
-CommandCode model catalog, `ohmg` binaries for macOS / Linux / Windows (x64 + arm64), and
-an automated upstream-sync-by-PR pipeline. This is based on upstream
-`can1357/oh-my-pi@v18.1.8`; internal package names and versions still read `@oh-my-pi/*`
-`18.1.8` on purpose (upstream graph compatibility — they are not published from this fork).
+Built on the excellent [Oh My Pi](https://github.com/can1357/oh-my-pi) engine
+(`can1357/oh-my-pi@v18.1.8`, MIT). Independent public fork, not affiliated
+with Stencil Labs — lineage: [Pi](https://github.com/badlogic/pi-mono) by
+[Mario Zechner](https://github.com/mariozechner) → Oh My Pi by
+[Can Bölük](https://github.com/can1357) / Stencil Labs → **OhMyGoat** by
+Eduardo M. D. P.
 
 ## Install (`ohmg`)
 
@@ -58,37 +60,28 @@ curl -fsSL https://ohmygoat.vercel.app/install | sh
 irm https://ohmygoat.vercel.app/install.ps1 | iex
 ```
 
-Both paths resolve the protected tag `ohmg-v0.0.3` (never the mutable `main` branch),
-validate assets against `SHA256SUMS.txt` before any atomic replacement, and smoke-test the
-installed binary (`ohmg --version` must print `ohmg/0.0.3`).
+Both paths pin the protected `ohmg-v0.0.3` release, check every asset against
+`SHA256SUMS.txt` before touching your system, and smoke-test the result.
 
-## Configuration
+## Your setup, safe by default
 
-- Config dir: `~/.ohmg/agent` on macOS/Linux, `%USERPROFILE%\.ohmg\agent` on Windows —
-  isolated from `~/.omp`; OhMyGoat never reads or writes the upstream config dir.
-- First install seeds `config.yml` (Dudu's preset: model roles, retry fallback chains,
-  `compaction.methodOrder` starting with `snapcompact`) and `models.yml` (CommandCode
-  catalog) **only when absent** — reinstalls never overwrite your choices.
-- CommandCode models activate when you export `COMMANDCODE_API_KEY`; no default model role
-  requires it.
-- `ohmg` continues to honor the inherited `OMP_*` / `PI_*` environment variables for
-  compatibility.
+- Everything lives in plain YAML under `~/.ohmg/agent` (macOS/Linux) or
+  `%USERPROFILE%\.ohmg\agent` (Windows) — isolated, never mixed with other tools.
+- First run seeds a curated starting setup (model roles, fallbacks,
+  long-session compaction) plus an on-demand model catalog **only when absent**.
+  Reinstalls never overwrite your choices.
+- Bring your own keys: `COMMANDCODE_API_KEY` unlocks extra models; nothing
+  requires it, nothing phones home.
 
-## Upstream sync policy
+## Maintained, not frozen
 
-`.github/workflows/sync-upstream.yml` merges `can1357/oh-my-pi` main daily into a single
-reviewable PR (label `upstream-sync`) — never auto-merged. Conflicts abort the push and
-open/update an `upstream-conflict` issue instead of guessing. Downstream-owned regions
-(brand/TUI, packaging presets, updater, installers, native lock, site) are never resolved
-automatically, and upstream workflow files cannot silently gain execution here (import
-guard + disabled inherited workflows).
+Upstream improvements arrive as reviewable PRs — never auto-merged, never
+silent breakage. Every release asset carries a build-provenance attestation
+you can verify yourself, and installers refuse to replace a working binary
+unless checksums and smoke tests pass.
 
-## Signing limitations
-
-macOS binaries are **ad-hoc signed and not notarized**; Windows binaries are **unsigned**
-(no Authenticode). Expect Gatekeeper / SmartScreen prompts. Every release asset carries a
-GitHub build-provenance attestation, and there are no npm / Homebrew / Mise channels for
-OhMyGoat.
+Heads-up: macOS builds are ad-hoc signed (not notarized) and Windows builds
+are unsigned, so expect one Gatekeeper / SmartScreen prompt.
 
 > Everything below this line is the inherited Oh My Pi documentation, kept intact to
 > credit upstream and minimize merge conflicts. Where it says `omp`, read `ohmg`; where

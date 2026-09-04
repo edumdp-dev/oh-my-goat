@@ -31,12 +31,12 @@ const en = {
   themeDark: "Dark",
   themeLight: "Light",
 
-  heroEyebrow: "PUBLIC FORK OF OH MY PI",
+  heroEyebrow: "TERMINAL CODING AGENT",
   heroTitle: "Your terminal agent. Tuned for the herd.",
   heroLede:
-    "OhMyGoat keeps Oh My Pi's power and adds a blue identity, Dudu's preset, a ready CommandCode catalog, and SnapCompact first.",
+    "Install in minutes, code for hours. OhMyGoat ships with a curated model setup, automatic fallbacks, and long sessions that stay sharp — no configuration rabbit hole.",
   heroInstallCta: "Install",
-  heroChangesCta: "What changes",
+  heroChangesCta: "Why OhMyGoat",
 
   osMacos: "macOS",
   osWindows: "Windows",
@@ -49,9 +49,9 @@ const en = {
     "Convenience only, no independent verification. Pipes the installer straight from ohmygoat.vercel.app.",
   installHeading: "Install",
   installLede:
-    "Binaries for macOS and Windows from the ohmg-v0.0.3 release. The installer seeds ~/.ohmg/agent/config.yml and models.yml only when they do not exist — reinstalling never overwrites your choices.",
+    "Pick your platform below. Verified is the safe default; Quick trades verification for speed. Either way you are running in minutes — and your existing config is never touched.",
   presetNote:
-    "Preset ships Dudu's model roles and SnapCompact-first compaction with no secrets. CommandCode stays ready via COMMANDCODE_API_KEY but is never the default.",
+    "Ships with a curated starting setup: model roles, fallbacks, long-session compaction. Your keys, your choices — nothing phones home.",
   copyLabel: "Copy",
   copiedMessage: "Copied to clipboard",
   copyFailedMessage: "Copy failed — select the text manually",
@@ -60,7 +60,7 @@ const en = {
 
   providersEyebrow: "MODEL PROVIDERS",
   providersNote:
-    "Bring your own keys. CommandCode is available when you set COMMANDCODE_API_KEY — it is not the default for any role.",
+    "Works with the providers you already pay for. Bring your own keys.",
   providerOpenCodeGo: "OpenCode Go",
   providerOpenAiCodex: "OpenAI Codex",
   providerCommandCode: "CommandCode",
@@ -68,75 +68,75 @@ const en = {
   featuresEyebrow: "CHANNELS",
   featuresHeading: "Features",
   featuresLede:
-    "Oh My Pi capabilities, preserved by the fork — plus the OhMyGoat deltas.",
+    "Everything you need to ship from the terminal.",
   featureDetailLabel: "Feature detail",
   featuresList: [
     {
       id: "goat",
-      title: "Blue goat",
-      body: "A blue Braille goat replaces the π mark in the TUI, with a truecolor and ANSI-256 blue palette and the ohmygoat v0.0.3 · made by dudu title.",
+      title: "Own identity",
+      body: "A goat mark, a clean terminal aesthetic, and a config that lives in its own ~/.ohmg — your setup never fights another tool's.",
     },
     {
       id: "preset",
-      title: "Dudu preset",
-      body: "A portable config preset with Dudu's model roles, fallback chains, and SnapCompact-first compaction. No tokens, no secrets — only env var names like COMMANDCODE_API_KEY.",
+      title: "Ready-to-run models",
+      body: "Roles, fallbacks, and thinking levels arrive preconfigured. Bring your own API keys — nothing secret ever ships in the box.",
     },
     {
       id: "commandcode",
-      title: "CommandCode ready",
-      body: "A ready-to-use model catalog ships with the install. Set COMMANDCODE_API_KEY and every CommandCode model lights up; nothing points at it by default.",
+      title: "More models on demand",
+      body: "A 47-model CommandCode catalog is one env var away. Nothing uses it until you say so.",
     },
     {
       id: "snapcompact",
-      title: "SnapCompact first",
-      body: "Compaction always tries SnapCompact first, then falls back through handoff, shake, and soft when the active model lacks image input.",
+      title: "Long sessions stay sharp",
+      body: "Compaction keeps big sessions coherent instead of degrading. SnapCompact first, graceful fallbacks after.",
     },
     {
       id: "lsp",
-      title: "LSP intelligence",
-      body: "An Oh My Pi capability preserved by the fork: language-server aware editing, diagnostics, and navigation inside the terminal agent.",
+      title: "Understands your code",
+      body: "Language-server aware edits, diagnostics, and navigation — the agent sees what your IDE sees.",
     },
     {
       id: "debugger",
-      title: "Debugger",
-      body: "An Oh My Pi capability preserved by the fork: a built-in debugging workflow for inspecting program state without leaving the session.",
+      title: "Debug without leaving",
+      body: "Inspect real program state mid-session instead of sprinkling print statements.",
     },
     {
       id: "orchestration",
-      title: "Agent orchestration",
-      body: "An Oh My Pi capability preserved by the fork: plan, delegate, and coordinate background agents from one terminal session.",
+      title: "Delegate the grind",
+      body: "Fan work out to background agents and get typed results back — no babysitting.",
     },
     {
       id: "upstream",
-      title: "Upstream current",
-      body: "A reviewable daily sync with can1357/oh-my-pi keeps the fork close to upstream v18.1.8. Nothing auto-merges; every sync lands as a reviewed PR.",
+      title: "Maintained, not frozen",
+      body: "Daily upstream syncs land as reviewed PRs, so you get fixes without surprises.",
     },
   ] as Array<{ id: string; title: string; body: string }>,
 
-  changesEyebrow: "DELTA",
-  changesHeading: "What changes",
-  changesLede: "Four deltas on top of Oh My Pi v18.1.8. Everything else stays byte-close to upstream.",
+  changesEyebrow: "WHY OHMYGOAT",
+  changesHeading: "Why OhMyGoat",
+  changesLede: "Built on the excellent Oh My Pi engine — plus everything needed to go from zero to shipping.",
   changesList: [
     {
-      title: "Blue brand",
-      body: "ohmg command, ohmygoat TUI title, isolated ~/.ohmg config, and a blue goat identity — no π mark, no magenta.",
+      title: "Running in minutes",
+      body: "One command installs the ohmg CLI on Windows or macOS. Verified binaries, checksums checked before anything touches your system.",
     },
     {
-      title: "Portable preset, no secrets",
-      body: "Dudu's model roles, fallback chains, and SnapCompact-first compaction ship as plain YAML. Reinstalls never overwrite; ~/.omp is never read or copied.",
+      title: "Setup that survives reinstalls",
+      body: "Your models and preferences live in plain YAML under ~/.ohmg — and reinstalls never overwrite them.",
     },
     {
-      title: "Windows & macOS binaries",
-      body: "Signed-by-attestation release assets for Windows x64/ARM64 and macOS Intel/Apple Silicon, installed via a Verified (gh attestation) or Quick path.",
+      title: "Install you can trust",
+      body: "Every release asset carries build-provenance attestations you can verify yourself before running anything.",
     },
     {
-      title: "Reviewable upstream sync",
-      body: "A daily automation opens a sync PR against can1357/oh-my-pi main. Conflicts become issues; brand, presets, updater, installers, and this site never auto-resolve.",
+      title: "Kept current",
+      body: "Upstream improvements arrive as reviewable PRs. Conflicts become issues, never silent breakage.",
     },
   ] as Array<{ title: string; body: string }>,
 
   lineageEyebrow: "LINEAGE",
-  lineageHeading: "Origin",
+  lineageHeading: "Built on open source",
   lineageChain: "Pi by Mario Zechner → Oh My Pi by Can Bölük / Stencil Labs → OhMyGoat by Eduardo M. D. P.",
   lineageLicense: "Released under the MIT license.",
   lineageDisclaimer: "Independent public fork; not affiliated with Stencil Labs.",
@@ -167,12 +167,12 @@ const pt: Strings = {
   themeDark: "Escuro",
   themeLight: "Claro",
 
-  heroEyebrow: "FORK PÚBLICO DE OH MY PI",
+  heroEyebrow: "AGENTE DE CODIFICAÇÃO PARA TERMINAL",
   heroTitle: "Seu agente de terminal. Afinado para o rebanho.",
   heroLede:
-    "OhMyGoat mantém a potência do Oh My Pi e adiciona identidade azul, o preset de Dudu, catálogo CommandCode pronto e SnapCompact em primeiro lugar.",
+    "Instale em minutos, programe por horas. OhMyGoat já vem com modelos configurados, fallbacks automáticos e sessões longas que não perdem o fio — sem labirinto de configuração.",
   heroInstallCta: "Instalar",
-  heroChangesCta: "O que muda",
+  heroChangesCta: "Por que OhMyGoat",
 
   osMacos: "macOS",
   osWindows: "Windows",
@@ -186,9 +186,9 @@ const pt: Strings = {
     "Apenas conveniência, sem verificação independente. Canaliza o instalador direto de ohmygoat.vercel.app.",
   installHeading: "Instalação",
   installLede:
-    "Binários para macOS e Windows da release ohmg-v0.0.3. O instalador cria ~/.ohmg/agent/config.yml e models.yml somente quando não existem — reinstalar nunca sobrescreve suas escolhas.",
+    "Escolha sua plataforma abaixo. Verificado é o padrão seguro; Rápido troca verificação por velocidade. De qualquer forma, em minutos você está rodando — e sua config existente nunca é tocada.",
   presetNote:
-    "O preset traz os model roles de Dudu e compactação SnapCompact-first sem segredos. CommandCode fica pronto via COMMANDCODE_API_KEY, mas nunca é o padrão.",
+    "Acompanha uma configuração inicial curada: model roles, fallbacks, compactação para sessões longas. Suas chaves, suas escolhas — nada liga para casa.",
   copyLabel: "Copiar",
   copiedMessage: "Copiado para a área de transferência",
   copyFailedMessage: "Falha ao copiar — selecione o texto manualmente",
@@ -197,7 +197,7 @@ const pt: Strings = {
 
   providersEyebrow: "PROVEDORES DE MODELO",
   providersNote:
-    "Traga suas próprias chaves. CommandCode fica disponível ao definir COMMANDCODE_API_KEY — não é o padrão de nenhum role.",
+    "Funciona com os provedores que você já paga. Traga suas próprias chaves.",
   providerOpenCodeGo: "OpenCode Go",
   providerOpenAiCodex: "OpenAI Codex",
   providerCommandCode: "CommandCode",
@@ -205,75 +205,75 @@ const pt: Strings = {
   featuresEyebrow: "CANAIS",
   featuresHeading: "Recursos",
   featuresLede:
-    "Capacidades do Oh My Pi, preservadas pelo fork — mais os deltas do OhMyGoat.",
+    "Tudo que você precisa para entregar código pelo terminal.",
   featureDetailLabel: "Detalhe do recurso",
   featuresList: [
     {
       id: "goat",
-      title: "Cabra azul",
-      body: "Uma cabra Braille azul substitui a marca π no TUI, com paleta azul truecolor e ANSI-256 e o título ohmygoat v0.0.3 · made by dudu.",
+      title: "Identidade própria",
+      body: "Marca da cabra, estética limpa de terminal e config isolada em ~/.ohmg — sua configuração nunca briga com outra ferramenta.",
     },
     {
       id: "preset",
-      title: "Preset do Dudu",
-      body: "Preset de configuração portátil com os model roles de Dudu, cadeias de fallback e compactação SnapCompact-first. Sem tokens, sem segredos — só nomes de variáveis como COMMANDCODE_API_KEY.",
+      title: "Modelos prontos para rodar",
+      body: "Roles, fallbacks e níveis de raciocínio já vêm configurados. Traga suas próprias chaves de API — nenhum segredo viaja na caixa.",
     },
     {
       id: "commandcode",
-      title: "CommandCode pronto",
-      body: "Um catálogo de modelos pronto acompanha a instalação. Defina COMMANDCODE_API_KEY e todos os modelos CommandCode acendem; nada aponta para ele por padrão.",
+      title: "Mais modelos sob demanda",
+      body: "Um catálogo CommandCode de 47 modelos a uma variável de ambiente de distância. Nada usa sem você mandar.",
     },
     {
       id: "snapcompact",
-      title: "SnapCompact primeiro",
-      body: "A compactação sempre tenta SnapCompact primeiro, depois recua por handoff, shake e soft quando o modelo ativo não tem entrada de imagem.",
+      title: "Sessões longas afiadas",
+      body: "A compactação mantém sessões grandes coerentes em vez de degradar. SnapCompact primeiro, fallbacks graciosos depois.",
     },
     {
       id: "lsp",
-      title: "Inteligência LSP",
-      body: "Uma capacidade do Oh My Pi preservada pelo fork: edição com language server, diagnósticos e navegação dentro do agente de terminal.",
+      title: "Entende seu código",
+      body: "Edição, diagnósticos e navegação com language server — o agente vê o que sua IDE vê.",
     },
     {
       id: "debugger",
-      title: "Depurador",
-      body: "Uma capacidade do Oh My Pi preservada pelo fork: fluxo de depuração embutido para inspecionar o estado do programa sem sair da sessão.",
+      title: "Depure sem sair",
+      body: "Inspecione o estado real do programa no meio da sessão em vez de espalhar prints.",
     },
     {
       id: "orchestration",
-      title: "Orquestração de agentes",
-      body: "Uma capacidade do Oh My Pi preservada pelo fork: planeje, delegue e coordene agentes em segundo plano a partir de uma sessão de terminal.",
+      title: "Delegue o trabalho pesado",
+      body: "Distribua tarefas para agentes em segundo plano e receba resultados tipados — sem babá.",
     },
     {
       id: "upstream",
-      title: "Upstream atualizado",
-      body: "Uma sincronização diária revisável com can1357/oh-my-pi mantém o fork próximo do upstream v18.1.8. Nada faz auto-merge; cada sync vira um PR revisado.",
+      title: "Mantido, não congelado",
+      body: "Syncs diários do upstream viram PRs revisados — você recebe correções sem surpresas.",
     },
   ] as Array<{ id: string; title: string; body: string }>,
 
-  changesEyebrow: "DELTA",
-  changesHeading: "O que muda",
-  changesLede: "Quatro deltas sobre o Oh My Pi v18.1.8. Todo o resto continua byte a byte próximo do upstream.",
+  changesEyebrow: "POR QUE OHMYGOAT",
+  changesHeading: "Por que OhMyGoat",
+  changesLede: "Construído sobre o excelente motor do Oh My Pi — mais tudo que falta para sair do zero ao shipping.",
   changesList: [
     {
-      title: "Marca azul",
-      body: "Comando ohmg, título ohmygoat no TUI, config isolada em ~/.ohmg e identidade visual da cabra azul — sem marca π, sem magenta.",
+      title: "Rodando em minutos",
+      body: "Um comando instala o CLI ohmg no Windows ou macOS. Binários verificados, checksums conferidos antes de tocar no seu sistema.",
     },
     {
-      title: "Preset portátil, sem segredos",
-      body: "Os model roles de Dudu, cadeias de fallback e compactação SnapCompact-first viajam como YAML puro. Reinstalações nunca sobrescrevem; ~/.omp nunca é lido nem copiado.",
+      title: "Configuração que sobrevive a reinstalações",
+      body: "Seus modelos e preferências vivem em YAML puro sob ~/.ohmg — e reinstalações nunca sobrescrevem.",
     },
     {
-      title: "Binários Windows e macOS",
-      body: "Assets de release com attestation para Windows x64/ARM64 e macOS Intel/Apple Silicon, instalados pelo caminho Verificado (attestation via gh) ou Rápido.",
+      title: "Instalação em que dá para confiar",
+      body: "Cada asset de release traz attestations de proveniência que você mesmo pode verificar antes de executar.",
     },
     {
-      title: "Sync upstream revisável",
-      body: "Uma automação diária abre um PR de sincronização com a main de can1357/oh-my-pi. Conflitos viram issues; marca, presets, updater, instaladores e este site nunca se resolvem sozinhos.",
+      title: "Sempre atualizado",
+      body: "Melhorias do upstream chegam como PRs revisáveis. Conflitos viram issues, nunca quebra silenciosa.",
     },
   ] as Array<{ title: string; body: string }>,
 
   lineageEyebrow: "ORIGEM",
-  lineageHeading: "Origem",
+  lineageHeading: "Feito sobre código aberto",
   lineageChain: "Pi por Mario Zechner → Oh My Pi por Can Bölük / Stencil Labs → OhMyGoat por Eduardo M. D. P.",
   lineageLicense: "Publicado sob a licença MIT.",
   lineageDisclaimer: "Fork público independente; sem afiliação com a Stencil Labs.",
