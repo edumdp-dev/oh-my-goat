@@ -867,7 +867,7 @@ describe("update-cli script-shim takeover", () => {
 					fetchImpl: makeFetch(exe),
 					githubToken: "test-token",
 				}),
-			).rejects.toThrow(/still reports 0\.0\.0 \(expected 0\.0\.2\); restored previous ohmg launcher/);
+			).rejects.toThrow(/still reports 0\.0\.0 \(expected 0\.0\.3\); restored previous ohmg launcher/);
 
 			expect(await Bun.file(path.join(dir, "ohmg.exe")).exists()).toBe(false);
 			for (const name in shims) {
