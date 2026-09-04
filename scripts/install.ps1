@@ -1,13 +1,13 @@
 # OhMyGoat Coding Agent Installer for Windows
-# Verify first: gh attestation verify install.ps1 --repo edumdp-dev/oh-my-goat --signer-workflow edumdp-dev/oh-my-goat/.github/workflows/release-ohmg.yml --source-ref refs/tags/ohmg-v0.0.2 --deny-self-hosted-runners
+# Verify first: gh attestation verify install.ps1 --repo edumdp-dev/oh-my-goat --signer-workflow edumdp-dev/oh-my-goat/.github/workflows/release-ohmg.yml --source-ref refs/tags/ohmg-v0.0.3 --deny-self-hosted-runners
 # Then run: & ([scriptblock]::Create((Get-Content .\install.ps1 -Raw)))
 # Or quick: irm https://ohmygoat.vercel.app/install.ps1 | iex
 #
 # Or with options:
 #   & ([scriptblock]::Create((Get-Content .\install.ps1 -Raw))) -Binary
 #   & ([scriptblock]::Create((Get-Content .\install.ps1 -Raw))) -Source
-#   & ([scriptblock]::Create((Get-Content .\install.ps1 -Raw))) -Source -Ref ohmg-v0.0.2
-#   & ([scriptblock]::Create((Get-Content .\install.ps1 -Raw))) -Binary -Ref ohmg-v0.0.2
+#   & ([scriptblock]::Create((Get-Content .\install.ps1 -Raw))) -Source -Ref ohmg-v0.0.3
+#   & ([scriptblock]::Create((Get-Content .\install.ps1 -Raw))) -Binary -Ref ohmg-v0.0.3
 
 param(
     [switch]$Source,
@@ -18,7 +18,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $Repo = "edumdp-dev/oh-my-goat"
-$DefaultTag = "ohmg-v0.0.2"
+$DefaultTag = "ohmg-v0.0.3"
 $InstallDir = if ($env:PI_INSTALL_DIR) { $env:PI_INSTALL_DIR } else { Join-Path $env:LOCALAPPDATA "ohmg" }
 $NativeArchitecture = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLowerInvariant()
 if ($NativeArchitecture -notin @("x64", "arm64")) {
@@ -295,7 +295,7 @@ function Install-Binary {
 
     New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
     $OutPath = Join-Path $InstallDir "ohmg.exe"
-    $TmpPath = "$OutPath.new-$PID"
+    $TmpPath = "$OutPath.new-$PID.exe"
     $SumsPath = "$OutPath.sums-$PID"
 
     try {

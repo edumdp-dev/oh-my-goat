@@ -1,13 +1,13 @@
 # OhMyGoat
 
 <p align="center">
-  <strong>ohmygoat v0.0.2 · made by dudu</strong><br/>
+  <strong>ohmygoat v0.0.3 · made by dudu</strong><br/>
   A blue-tuned public fork of <a href="https://github.com/can1357/oh-my-pi">Oh My Pi</a> — same engine, own identity.
 </p>
 
 <p align="center">
   <a href="https://ohmygoat.vercel.app"><img src="https://img.shields.io/badge/website-ohmygoat.vercel.app-39A7FF?style=flat&colorA=222222" alt="Website"></a>
-  <a href="https://github.com/edumdp-dev/oh-my-goat/releases/tag/ohmg-v0.0.2"><img src="https://img.shields.io/github/v/release/edumdp-dev/oh-my-goat?label=ohmg&color=8FE6FF&style=flat&colorA=222222" alt="OhMyGoat release"></a>
+  <a href="https://github.com/edumdp-dev/oh-my-goat/releases/tag/ohmg-v0.0.3"><img src="https://img.shields.io/github/v/release/edumdp-dev/oh-my-goat?label=ohmg&color=8FE6FF&style=flat&colorA=222222" alt="OhMyGoat release"></a>
   <a href="https://github.com/edumdp-dev/oh-my-goat/actions/workflows/ohmg-ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/edumdp-dev/oh-my-goat/ohmg-ci.yml?label=OhMyGoat%20CI&color=3FB950&style=flat&colorA=222222" alt="OhMyGoat CI"></a>
   <a href="https://github.com/edumdp-dev/oh-my-goat/blob/main/LICENSE"><img src="https://img.shields.io/github/license/edumdp-dev/oh-my-goat?style=flat&colorA=222222&colorB=58A6FF" alt="License"></a>
 </p>
@@ -29,20 +29,20 @@ an automated upstream-sync-by-PR pipeline. This is based on upstream
 **macOS / Linux**
 
 ```sh
-curl -fSLO https://github.com/edumdp-dev/oh-my-goat/releases/download/ohmg-v0.0.2/install.sh
+curl -fSLO https://github.com/edumdp-dev/oh-my-goat/releases/download/ohmg-v0.0.3/install.sh
 gh attestation verify install.sh --repo edumdp-dev/oh-my-goat \
   --signer-workflow edumdp-dev/oh-my-goat/.github/workflows/release-ohmg.yml \
-  --source-ref refs/tags/ohmg-v0.0.2 --deny-self-hosted-runners
+  --source-ref refs/tags/ohmg-v0.0.3 --deny-self-hosted-runners
 sh install.sh
 ```
 
 **Windows (PowerShell)**
 
 ```powershell
-irm https://github.com/edumdp-dev/oh-my-goat/releases/download/ohmg-v0.0.2/install.ps1 -OutFile install.ps1
+irm https://github.com/edumdp-dev/oh-my-goat/releases/download/ohmg-v0.0.3/install.ps1 -OutFile install.ps1
 gh attestation verify install.ps1 --repo edumdp-dev/oh-my-goat `
   --signer-workflow edumdp-dev/oh-my-goat/.github/workflows/release-ohmg.yml `
-  --source-ref refs/tags/ohmg-v0.0.2 --deny-self-hosted-runners
+  --source-ref refs/tags/ohmg-v0.0.3 --deny-self-hosted-runners
 & ([scriptblock]::Create((Get-Content .\install.ps1 -Raw)))
 ```
 
@@ -58,9 +58,9 @@ curl -fsSL https://ohmygoat.vercel.app/install | sh
 irm https://ohmygoat.vercel.app/install.ps1 | iex
 ```
 
-Both paths resolve the protected tag `ohmg-v0.0.2` (never the mutable `main` branch),
+Both paths resolve the protected tag `ohmg-v0.0.3` (never the mutable `main` branch),
 validate assets against `SHA256SUMS.txt` before any atomic replacement, and smoke-test the
-installed binary (`ohmg --version` must print `ohmg/0.0.2`).
+installed binary (`ohmg --version` must print `ohmg/0.0.3`).
 
 ## Configuration
 

@@ -2,19 +2,19 @@
 set -e
 
 # OhMyGoat Coding Agent Installer
-# Usage: curl -fSLO https://github.com/edumdp-dev/oh-my-goat/releases/download/ohmg-v0.0.2/install.sh
-#        (verify first with: gh attestation verify install.sh --repo edumdp-dev/oh-my-goat --signer-workflow edumdp-dev/oh-my-goat/.github/workflows/release-ohmg.yml --source-ref refs/tags/ohmg-v0.0.2 --deny-self-hosted-runners)
+# Usage: curl -fSLO https://github.com/edumdp-dev/oh-my-goat/releases/download/ohmg-v0.0.3/install.sh
+#        (verify first with: gh attestation verify install.sh --repo edumdp-dev/oh-my-goat --signer-workflow edumdp-dev/oh-my-goat/.github/workflows/release-ohmg.yml --source-ref refs/tags/ohmg-v0.0.3 --deny-self-hosted-runners)
 #        then: sh install.sh
 #        or quick: curl -fsSL https://ohmygoat.vercel.app/install | sh
 #
 # Options:
 #   --source       Install via bun (installs bun if needed)
 #   --binary       Install prebuilt binary (default)
-#   --ref <ref>    Install specific release tag (default: ohmg-v0.0.2)
+#   --ref <ref>    Install specific release tag (default: ohmg-v0.0.3)
 #   -r <ref>       Shorthand for --ref
 
 REPO="edumdp-dev/oh-my-goat"
-DEFAULT_TAG="ohmg-v0.0.2"
+DEFAULT_TAG="ohmg-v0.0.3"
 BIN_NAME="ohmg"
 INSTALL_DIR="${PI_INSTALL_DIR:-$HOME/.local/bin}"
 MIN_BUN_VERSION="1.3.14"

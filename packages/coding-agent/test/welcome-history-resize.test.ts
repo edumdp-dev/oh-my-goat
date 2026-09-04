@@ -124,7 +124,7 @@ describe("composer welcome native-history resize", () => {
 			terminal,
 			tuiOptions: { renderScheduler: scheduler },
 			preferences: { ...COMPOSER_DEFAULTS, quiet: false, resizeScrollback: "preserve" },
-			welcome: { version: "0.0.2", modelName: "test-model", providerName: "test-provider" },
+			welcome: { version: "0.0.3", modelName: "test-model", providerName: "test-provider" },
 		});
 		const offered: number[] = [];
 		const acknowledged: number[] = [];
@@ -152,7 +152,7 @@ describe("composer welcome native-history resize", () => {
 		composer.start({ playWelcomeIntro: false });
 
 		expect(countRows(plainBuffer(terminal), "Welcome back!")).toBe(1);
-		expect(plainBuffer(terminal).join("\n")).toContain("ohmygoat v0.0.2 · made by dudu");
+		expect(plainBuffer(terminal).join("\n")).toContain("ohmygoat v0.0.3 · made by dudu");
 		expect(offered).toHaveLength(1);
 		expect(acknowledged).toEqual(offered);
 		const initialAnchor = expectOneExactEditor(
