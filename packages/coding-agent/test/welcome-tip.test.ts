@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it, spyOn } from "bun:test";
-import { renderWelcomeTip, WelcomeComponent } from "@oh-my-pi/pi-coding-agent/modes/components/welcome";
+import { GOAT_LOGO, renderWelcomeTip, WelcomeComponent } from "@oh-my-pi/pi-coding-agent/modes/components/welcome";
 import { initTheme, setSymbolPreset, setTheme, theme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
 import { visibleWidth } from "@oh-my-pi/pi-tui";
 
@@ -104,6 +104,42 @@ describe("renderWelcomeTip", () => {
 		} finally {
 			rand.mockRestore();
 			await setSymbolPreset("unicode");
+		}
+	});
+
+	it("renders the exact product title and all three responsive welcome regimes", () => {
+		const welcome = new WelcomeComponent(
+			"0.0.1",
+			"muse-spark-1.3-contributor",
+			"opencode-go",
+			[{ name: "prior work", timeAgo: "5m ago" }],
+			[{ name: "typescript", status: "ready", fileTypes: [".ts"] }],
+		);
+		const frames = [32, 60, 80, 120].map(width => ({
+			width,
+			lines: welcome.render(width),
+		}));
+		for (const { width, lines } of frames) {
+			expect(lines.every(line => visibleWidth(line) <= width)).toBe(true);
+		}
+
+		const narrow = frames[0]!.lines.map(line => Bun.stripANSI(line));
+		expect(narrow.join("\n")).toContain("O h   M y   G o a t");
+		expect(narrow.join("\n")).not.toContain(GOAT_LOGO[6].trim());
+
+		const stacked = frames[1]!.lines.map(line => Bun.stripANSI(line));
+		expect(stacked.join("\n")).toContain(GOAT_LOGO[6].trim());
+		expect(stacked.findIndex(line => line.includes("Tips"))).toBeGreaterThan(
+			stacked.findIndex(line => line.includes(GOAT_LOGO[6].trim())),
+		);
+
+		for (const frame of frames.slice(2)) {
+			const plain = frame.lines.map(line => Bun.stripANSI(line));
+			expect(plain.join("\n")).toContain("ohmygoat v0.0.1 · made by dudu");
+			expect(plain.join("\n")).toContain(GOAT_LOGO[6].trim());
+			expect(plain.findIndex(line => line.includes("Tips"))).toBeLessThan(
+				plain.findIndex(line => line.includes(GOAT_LOGO[6].trim())),
+			);
 		}
 	});
 });

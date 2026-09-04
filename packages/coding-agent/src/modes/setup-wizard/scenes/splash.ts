@@ -1,26 +1,14 @@
 import { padding, truncateToWidth, visibleWidth } from "@oh-my-pi/pi-tui";
-import { gradientEscape, gradientLogo, PI_LOGO, type ShineConfig } from "../../components/welcome";
+import { PRODUCT_BYLINE } from "@oh-my-pi/pi-utils";
+import { GOAT_LOGO, GOAT_WORDMARK, gradientEscape, gradientLogo, type ShineConfig } from "../../components/welcome";
 import { theme } from "../../theme/theme";
 
 export const SETUP_SPLASH_MS = 2600;
 export const SETUP_TICK_MS = 33;
 
-/** Brand mark at 2x: every glyph doubled horizontally, every row doubled vertically. */
-const LARGE_LOGO = PI_LOGO.flatMap(line => {
-	let wide = "";
-	for (const char of line) {
-		wide += char === " " ? "  " : `${char}${char}`;
-	}
-	return [wide, wide];
-});
-const LOGO_WIDTH = Math.max(...LARGE_LOGO.map(line => visibleWidth(line)));
-const LOGO_HEIGHT = LARGE_LOGO.length;
+const LOGO_WIDTH = Math.max(...GOAT_LOGO.map(line => visibleWidth(line)));
+const LOGO_HEIGHT = GOAT_LOGO.length;
 const RESET = "\x1b[0m";
-
-/** Full scene needs comfortable room; below this we drop to a centered mark. */
-const MIN_SCENE_WIDTH = 56;
-const MIN_SCENE_HEIGHT = 22;
-
 const SKIP_HINT = "press enter to skip";
 
 /** Density ramp for the rippling water, lightest → heaviest. */
@@ -117,20 +105,20 @@ function waterAmplitude(
 }
 
 /**
- * Animated setup splash, in the spirit of the omp landing page: the brand π
- * mark rendered with the live diagonal gradient + shine sweep, rising out of a
- * rippling, gradient-lit water surface, under a faint twinkling starfield. The
- * mark and water share one continuous gradient so the sweep reads across the
- * whole scene; the water surface drifts each frame.
+ * Animated setup splash: the blue goat mark rises out of a rippling,
+ * gradient-lit water surface under a faint twinkling starfield. The mark and
+ * water share one continuous gradient so the sweep reads across the scene.
  */
 export function renderSetupSplash(width: number, height: number, elapsedMs: number): string[] {
-	const w = Math.max(1, width);
-	const h = Math.max(1, height);
+	const h = Math.max(0, Math.floor(height));
+	if (h === 0) return [];
+	const w = Math.max(0, Math.floor(width));
+	if (w === 0) return Array.from({ length: h }, () => "");
 	const progress = Math.max(0, Math.min(1, elapsedMs / SETUP_SPLASH_MS));
 	const phase = progress * 1.8;
 	const shine: ShineConfig = { pos: (progress * 2.5) % 1, strength: Math.max(0, 1 - progress * 0.35) };
 
-	if (w < MIN_SCENE_WIDTH || h < MIN_SCENE_HEIGHT) return renderCompactSplash(w, h, phase, shine);
+	if (w < LOGO_WIDTH + 8 || h < LOGO_HEIGHT + 8) return renderCompactSplash(w, h, phase, shine);
 
 	const frame = Math.floor(elapsedMs / SETUP_TICK_MS);
 	const cx = Math.floor(w / 2);
@@ -162,8 +150,8 @@ export function renderSetupSplash(width: number, height: number, elapsedMs: numb
 			if (star) put(x, y, star);
 		}
 	}
-	// 3. hero — the brand mark with the live gradient + shine sweep
-	LARGE_LOGO.forEach((line, row) => {
+	// 3. hero — the 1x goat mark with the live gradient + shine sweep
+	GOAT_LOGO.forEach((line, row) => {
 		let col = 0;
 		for (const ch of line) {
 			if (ch !== " ") {
@@ -176,27 +164,39 @@ export function renderSetupSplash(width: number, height: number, elapsedMs: numb
 			col++;
 		}
 	});
-	// 4. skip hint on a cleared strip at the bottom so it stays legible over the water
-	const hintWidth = visibleWidth(SKIP_HINT);
-	const hintStart = Math.floor((w - hintWidth) / 2);
-	const hintRow = h - 1;
-	for (let x = hintStart - 1; x <= hintStart + hintWidth; x++) put(x, hintRow, " ");
-	let col = hintStart;
-	for (const ch of SKIP_HINT) put(col++, hintRow, ch === " " ? " " : theme.fg("dim", ch));
+	// 4. byline and skip hint on cleared strips at the bottom.
+	const footerLines = [PRODUCT_BYLINE, SKIP_HINT];
+	for (let footerIndex = 0; footerIndex < footerLines.length; footerIndex++) {
+		const text = footerLines[footerIndex] ?? "";
+		const textWidth = visibleWidth(text);
+		const textStart = Math.floor((w - textWidth) / 2);
+		const row = h - 2 + footerIndex;
+		for (let x = 0; x < w; x++) put(x, row, " ");
+		let col = textStart;
+		for (const ch of text) put(col++, row, ch === " " ? " " : theme.fg("dim", ch));
+	}
 
 	return cells.map(row => row.join(""));
 }
 
 /** Centered fallback for windows too small to hold the full scene. */
 function renderCompactSplash(width: number, height: number, phase: number, shine: ShineConfig): string[] {
-	const art = height >= 14 ? LARGE_LOGO : PI_LOGO;
-	const content = [...gradientLogo(art, phase, shine), "", theme.bold("O h   M y   P i")];
-	const start = Math.max(0, Math.floor((height - content.length) / 2));
+	const availableHeight = Math.max(0, height - 2);
+	const showArt = width >= LOGO_WIDTH && availableHeight >= LOGO_HEIGHT + 2;
+	const content = showArt
+		? [...gradientLogo(GOAT_LOGO, phase, shine), "", theme.bold(GOAT_WORDMARK)]
+		: [theme.bold(GOAT_WORDMARK)];
+	const start = Math.max(0, Math.floor((availableHeight - content.length) / 2));
 	const lines: string[] = [];
 	for (let y = 0; y < height; y++) {
-		const item = content[y - start];
+		const item = y < availableHeight ? content[y - start] : undefined;
 		lines.push(clampLine(item !== undefined ? centerLine(item, width) : "", width));
 	}
-	if (height > 2) lines[height - 2] = clampLine(centerLine(theme.fg("dim", SKIP_HINT), width), width);
+	if (height >= 2) {
+		lines[height - 2] = clampLine(centerLine(theme.fg("dim", PRODUCT_BYLINE), width), width);
+		lines[height - 1] = clampLine(centerLine(theme.fg("dim", SKIP_HINT), width), width);
+	} else if (height === 1) {
+		lines[0] = clampLine(centerLine(theme.fg("dim", SKIP_HINT), width), width);
+	}
 	return lines;
 }

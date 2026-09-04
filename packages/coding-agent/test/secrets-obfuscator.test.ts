@@ -2959,10 +2959,10 @@ describe("SecretObfuscator friendlyName placeholders", () => {
 		try {
 			const project = path.join(root, "project");
 			const agentDir = path.join(root, "agent");
-			await fs.mkdir(path.join(project, ".omp"), { recursive: true });
+			await fs.mkdir(path.join(project, ".ohmg"), { recursive: true });
 			await fs.mkdir(agentDir, { recursive: true });
 			await fs.writeFile(
-				path.join(project, ".omp", "secrets.yml"),
+				path.join(project, ".ohmg", "secrets.yml"),
 				"- type: plain\n  content: invalid-friendly-secret\n  friendlyName: '***'\n",
 			);
 
@@ -2985,10 +2985,10 @@ describe("SecretObfuscator friendlyName placeholders", () => {
 		try {
 			const project = path.join(root, "project");
 			const agentDir = path.join(root, "agent");
-			await fs.mkdir(path.join(project, ".omp"), { recursive: true });
+			await fs.mkdir(path.join(project, ".ohmg"), { recursive: true });
 			await fs.mkdir(agentDir, { recursive: true });
 			await fs.writeFile(
-				path.join(project, ".omp", "secrets.yml"),
+				path.join(project, ".ohmg", "secrets.yml"),
 				"- type: plain\n  content: non-string-friendly-secret\n  friendlyName: 123\n",
 			);
 
@@ -3011,10 +3011,10 @@ describe("SecretObfuscator friendlyName placeholders", () => {
 		try {
 			const project = path.join(root, "project");
 			const agentDir = path.join(root, "agent");
-			await fs.mkdir(path.join(project, ".omp"), { recursive: true });
+			await fs.mkdir(path.join(project, ".ohmg"), { recursive: true });
 			await fs.mkdir(agentDir, { recursive: true });
 			await fs.writeFile(
-				path.join(project, ".omp", "secrets.yml"),
+				path.join(project, ".ohmg", "secrets.yml"),
 				'- type: regex\n  mode: replace\n  content: "."\n',
 			);
 
@@ -3040,10 +3040,10 @@ describe("SecretObfuscator friendlyName placeholders", () => {
 		try {
 			const project = path.join(root, "project");
 			const agentDir = path.join(root, "agent");
-			await fs.mkdir(path.join(project, ".omp"), { recursive: true });
+			await fs.mkdir(path.join(project, ".ohmg"), { recursive: true });
 			await fs.mkdir(agentDir, { recursive: true });
 			await fs.writeFile(
-				path.join(project, ".omp", "secrets.yml"),
+				path.join(project, ".ohmg", "secrets.yml"),
 				'- type: regex\n  content: "tok_[a-z0-9]+"\n  friendlyName: "tok_abc123"\n',
 			);
 

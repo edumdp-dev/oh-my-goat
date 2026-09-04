@@ -37,12 +37,11 @@ registerPluginCacheInvalidator(clearEnabledPluginsCache);
 // =============================================================================
 
 /**
- * Load plugin runtime config from lock file.
- *
- * `home` controls which `<plugins>/omp-plugins.lock.json` is read — pass it
- * through whenever the caller is loading plugins for a tempdir-rooted
- * scenario (tests, discovery sub-surfaces that need to mirror an alternate
- * `LoadContext.home`).
+ * Load plugin runtime config from the lock file returned by
+ * `getPluginsLockfile()` (the single source for the runtime lock filename).
+ * `home` selects which plugins root is read — pass it through for
+ * tempdir-rooted scenarios (tests, discovery sub-surfaces mirroring an
+ * alternate `LoadContext.home`).
  */
 async function loadRuntimeConfig(home?: string): Promise<PluginRuntimeConfig> {
 	const lockPath = getPluginsLockfile(home);
@@ -70,7 +69,7 @@ async function loadProjectOverrides(cwd: string): Promise<ProjectPluginOverrides
 }
 /**
  * Per-root enumeration of plugins from `<root>/node_modules`,
- * `<root>/package.json#dependencies`, and `<root>/omp-plugins.lock.json#plugins`.
+ * `<root>/package.json#dependencies`, and the runtime lock's `plugins` map.
  * Honors `projectOverrides.disabled` and `projectOverrides.features`. Returns an
  * empty array when the root has no `node_modules` yet.
  */
@@ -95,7 +94,7 @@ async function collectPluginsAtRoot(
 		if (!isEnoent(err)) throw err;
 	}
 
-	const lockPath = path.join(root, "omp-plugins.lock.json");
+	const lockPath = path.join(root, path.basename(getPluginsLockfile()));
 	let runtimeConfig: PluginRuntimeConfig;
 	try {
 		runtimeConfig = normalizePluginRuntimeConfig(await Bun.file(lockPath).json());
@@ -185,10 +184,10 @@ async function collectPluginsAtRoot(
  * Enumerates two plugin roots in order: the user root
  * (`getPluginsDir(home)`) and, when a project anchor (`.omp/` or `.git/`)
  * exists at or above `cwd`, the project root
- * (`<projectAnchor>/.omp/plugins`). Each root contributes the union of its
- * `package.json#dependencies` and `omp-plugins.lock.json#plugins`. Project
- * entries shadow user entries with the same package name, matching the
- * shadow semantics of `MarketplaceManager.listInstalledPlugins`.
+ * (`<projectAnchor>/<config-dir>/plugins`). Each root contributes the union of
+ * its `package.json#dependencies` and the runtime lock's `plugins` map.
+ * Project entries shadow user entries with the same package name, matching
+ * the shadow semantics of `MarketplaceManager.listInstalledPlugins`.
  *
  * The optional `home` parameter pins the user plugins root for callers that
  * need to enumerate plugins relative to a non-default home (tests with a

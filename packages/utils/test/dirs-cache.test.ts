@@ -3,6 +3,8 @@ import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import {
+	APP_NAME,
+	CONFIG_DIR_NAME,
 	__resetDirsFromEnvForTests,
 	getActiveProfile,
 	getComposerCacheDir,
@@ -48,30 +50,30 @@ describe("document conversion cache directory", () => {
 		await fs.rm(tempRoot, { recursive: true, force: true });
 	});
 
-	it("uses XDG_CACHE_HOME for the default agent dir when $XDG_CACHE_HOME/omp exists", async () => {
+	it("uses XDG_CACHE_HOME for the default agent dir when its app segment exists", async () => {
 		if (process.platform === "win32") return;
 
 		process.env.XDG_CACHE_HOME = path.join(tempRoot, "cache");
-		await fs.mkdir(path.join(process.env.XDG_CACHE_HOME, "omp"), { recursive: true });
+		await fs.mkdir(path.join(process.env.XDG_CACHE_HOME, APP_NAME), { recursive: true });
 
 		const defaultAgentDir = path.join(os.homedir(), getConfigDirName(), "agent");
 		setAgentDir(defaultAgentDir);
 
 		expect(getDocumentConversionCacheDir()).toBe(
-			path.join(process.env.XDG_CACHE_HOME, "omp", "cache", "document-conversions"),
+			path.join(process.env.XDG_CACHE_HOME, APP_NAME, "cache", "document-conversions"),
 		);
 	});
 
-	it("routes getComposerCacheDir to $XDG_CACHE_HOME/omp/cache/composer", async () => {
+	it("routes getComposerCacheDir through the XDG app segment", async () => {
 		if (process.platform === "win32") return;
 
 		process.env.XDG_CACHE_HOME = path.join(tempRoot, "cache");
-		await fs.mkdir(path.join(process.env.XDG_CACHE_HOME, "omp"), { recursive: true });
+		await fs.mkdir(path.join(process.env.XDG_CACHE_HOME, APP_NAME), { recursive: true });
 
 		const defaultAgentDir = path.join(os.homedir(), getConfigDirName(), "agent");
 		setAgentDir(defaultAgentDir);
 
-		expect(getComposerCacheDir()).toBe(path.join(process.env.XDG_CACHE_HOME, "omp", "cache", "composer"));
+		expect(getComposerCacheDir()).toBe(path.join(process.env.XDG_CACHE_HOME, APP_NAME, "cache", "composer"));
 	});
 
 	it("stays under a custom PI_CODING_AGENT_DIR", () => {
@@ -167,20 +169,20 @@ describe("legacy file adoption on XDG paths", () => {
 		if (process.platform === "win32") return;
 		const xdgState = path.join(tempRoot, "xdg-state");
 		const xdgData = path.join(tempRoot, "xdg-data");
-		await fs.mkdir(path.join(xdgState, "omp"), { recursive: true });
-		await fs.mkdir(path.join(xdgData, "omp"), { recursive: true });
-		// Legacy layout: key under ~/.omp/agent, registry under ~/.omp.
-		await fs.mkdir(path.join(tempRoot, ".omp", "agent"), { recursive: true });
-		await fs.writeFile(path.join(tempRoot, ".omp", "agent", "secret-placeholder.key"), "legacy-key");
-		await fs.writeFile(path.join(tempRoot, ".omp", "marketplaces.json"), '{"legacy":true}');
+		await fs.mkdir(path.join(xdgState, APP_NAME), { recursive: true });
+		await fs.mkdir(path.join(xdgData, APP_NAME), { recursive: true });
+		// Legacy non-XDG layout under the current isolated config root.
+		await fs.mkdir(path.join(tempRoot, CONFIG_DIR_NAME, "agent"), { recursive: true });
+		await fs.writeFile(path.join(tempRoot, CONFIG_DIR_NAME, "agent", "secret-placeholder.key"), "legacy-key");
+		await fs.writeFile(path.join(tempRoot, CONFIG_DIR_NAME, "marketplaces.json"), '{"legacy":true}');
 		// The XDG registry is already populated: adoption must not overwrite it.
-		await fs.writeFile(path.join(xdgData, "omp", "marketplaces.json"), '{"xdg":true}');
+		await fs.writeFile(path.join(xdgData, APP_NAME, "marketplaces.json"), '{"xdg":true}');
 		activateTempHome({ XDG_STATE_HOME: xdgState, XDG_DATA_HOME: xdgData });
 
 		const key = getSecretPlaceholderKeyPath();
 		const registry = getMarketplacesRegistryPath();
-		expect(key).toBe(path.join(xdgState, "omp", "secret-placeholder.key"));
-		expect(registry).toBe(path.join(xdgData, "omp", "marketplaces.json"));
+		expect(key).toBe(path.join(xdgState, APP_NAME, "secret-placeholder.key"));
+		expect(registry).toBe(path.join(xdgData, APP_NAME, "marketplaces.json"));
 		expect(await fs.readFile(key, "utf8")).toBe("legacy-key");
 		expect(await fs.readFile(registry, "utf8")).toBe('{"xdg":true}');
 	});
@@ -188,7 +190,9 @@ describe("legacy file adoption on XDG paths", () => {
 	it("keeps the legacy paths canonical when XDG is inactive", async () => {
 		if (process.platform === "win32") return;
 		activateTempHome({});
-		expect(getSecretPlaceholderKeyPath()).toBe(path.join(tempRoot, ".omp", "agent", "secret-placeholder.key"));
-		expect(getMarketplacesRegistryPath()).toBe(path.join(tempRoot, ".omp", "marketplaces.json"));
+		expect(getSecretPlaceholderKeyPath()).toBe(
+			path.join(tempRoot, CONFIG_DIR_NAME, "agent", "secret-placeholder.key"),
+		);
+		expect(getMarketplacesRegistryPath()).toBe(path.join(tempRoot, CONFIG_DIR_NAME, "marketplaces.json"));
 	});
 });

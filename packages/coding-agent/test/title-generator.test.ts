@@ -720,7 +720,7 @@ describe("terminal title runtime", () => {
 			writes.length = 0;
 
 			setTerminalTitleState("working");
-			expect(emittedTitles()).toEqual(["π : windows-project"]);
+			expect(emittedTitles()).toEqual(["g : windows-project"]);
 
 			writes.length = 0;
 			vi.advanceTimersByTime(400);
@@ -740,7 +740,7 @@ describe("terminal title runtime", () => {
 			writes.length = 0;
 
 			setTerminalTitleState("working");
-			expect(emittedTitles()).toEqual(["π : wsl-project"]);
+			expect(emittedTitles()).toEqual(["g : wsl-project"]);
 
 			writes.length = 0;
 			vi.advanceTimersByTime(400);

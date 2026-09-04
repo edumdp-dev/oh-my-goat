@@ -20,9 +20,9 @@ import {
 	APP_NAME,
 	getActiveProfile,
 	MIN_BUN_VERSION,
+	PRODUCT_VERSION,
 	resolveProfileEnv,
 	setProfile,
-	VERSION,
 } from "@oh-my-pi/pi-utils/dirs";
 import { fatal, interceptUnhandledRejections } from "@oh-my-pi/pi-utils/postmortem";
 import { setProcessName } from "@oh-my-pi/pi-utils/process-name";
@@ -444,7 +444,7 @@ export async function runCli(argv: string[]): Promise<void> {
 		// keeps the TUI graph out of worker, subcommand, help, and version launches.
 		// Loading it statically would erase the measured cold-start improvement.
 		const { beginStartupComposer, stopPendingStartupComposer } = await import("./modes/startup-composer");
-		beginStartupComposer({ version: VERSION });
+		beginStartupComposer({ version: PRODUCT_VERSION });
 		stopStartupComposer = stopPendingStartupComposer;
 	}
 
@@ -461,7 +461,7 @@ export async function runCli(argv: string[]): Promise<void> {
 			process.exitCode = 1;
 			return;
 		}
-		await run({ bin: APP_NAME, version: VERSION, argv: resolved.argv, commands, metadataHelp: showHelp });
+		await run({ bin: APP_NAME, version: PRODUCT_VERSION, argv: resolved.argv, commands, metadataHelp: showHelp });
 	} finally {
 		stopStartupComposer?.();
 	}

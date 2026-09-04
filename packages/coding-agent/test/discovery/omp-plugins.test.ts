@@ -1,7 +1,7 @@
 /**
  * Regression tests for #1496.
  *
- * The native `omp` discovery provider only walks `.omp/` and `~/.omp/agent/`.
+ * The native `omp` discovery provider only walks `.omp/` and `~/.ohmg/agent/`.
  * Extension packages registered via `extensions:` in settings or
  * `--extension` on the CLI ship their own `skills/`, `hooks/`, `tools/`,
  * `commands/`, `rules/`, `prompts/`, and `.mcp.json`. The `omp-plugins`
@@ -101,7 +101,7 @@ beforeEach(() => {
 	fs.mkdirSync(project, { recursive: true });
 	fs.mkdirSync(path.join(project, ".git"), { recursive: true });
 	buildExtensionPackage(ext);
-	setAgentDir(path.join(home, ".omp", "agent"));
+	setAgentDir(path.join(home, ".ohmg", "agent"));
 });
 
 afterEach(() => {
@@ -142,25 +142,35 @@ async function expectExtensionSubDirectoriesLoaded(context: LoadContext): Promis
 }
 
 test("project settings.json#extensions surfaces every sub-directory", async () => {
-	writeFile(path.join(project, ".omp", "settings.json"), JSON.stringify({ extensions: [ext] }));
+	writeFile(path.join(project, ".ohmg", "settings.json"), JSON.stringify({ extensions: [ext] }));
 	await expectExtensionSubDirectoriesLoaded(ctx());
 });
 
 test("user settings.json#extensions also feeds sub-discovery", async () => {
-	writeFile(path.join(home, ".omp", "agent", "settings.json"), JSON.stringify({ extensions: [ext] }));
+	writeFile(path.join(home, ".ohmg", "agent", "settings.json"), JSON.stringify({ extensions: [ext] }));
 
 	const skills = await loadFromPlugin<{ name: string }>(skillCapability.id, ctx());
 	expect(skills.map(s => s.name)).toContain("my-skill");
 });
 
 test("project config.yml#extensions surfaces every sub-directory (#9768)", async () => {
-	writeFile(path.join(project, ".omp", "config.yml"), `extensions:\n  - "${ext}"\n`);
+	writeFile(
+		path.join(project, ".ohmg", "config.yml"),
+		`extensions:
+  - '${ext}'
+`,
+	);
 	await expectExtensionSubDirectoriesLoaded(ctx());
 });
 
 test("user config.yaml#extensions feeds sub-discovery", async () => {
 	// User scope also honors the legacy-compatible `config.yaml` filename.
-	writeFile(path.join(home, ".omp", "agent", "config.yaml"), `extensions:\n  - "${ext}"\n`);
+	writeFile(
+		path.join(home, ".ohmg", "agent", "config.yaml"),
+		`extensions:
+  - '${ext}'
+`,
+	);
 
 	const skills = await loadFromPlugin<{ name: string }>(skillCapability.id, ctx());
 	expect(skills.map(s => s.name)).toContain("my-skill");
@@ -173,9 +183,19 @@ test("project config.yml#extensions replaces lower-precedence configured roots",
 	buildExtensionPackage(userExt, "user-skill");
 	buildExtensionPackage(projectSettingsExt, "project-settings-skill");
 	buildExtensionPackage(projectConfigExt, "project-config-skill");
-	writeFile(path.join(home, ".omp", "agent", "config.yml"), `extensions:\n  - "${userExt}"\n`);
-	writeFile(path.join(project, ".omp", "settings.json"), JSON.stringify({ extensions: [projectSettingsExt] }));
-	writeFile(path.join(project, ".omp", "config.yml"), `extensions:\n  - "${projectConfigExt}"\n`);
+	writeFile(
+		path.join(home, ".ohmg", "agent", "config.yml"),
+		`extensions:
+  - '${userExt}'
+`,
+	);
+	writeFile(path.join(project, ".ohmg", "settings.json"), JSON.stringify({ extensions: [projectSettingsExt] }));
+	writeFile(
+		path.join(project, ".ohmg", "config.yml"),
+		`extensions:
+  - '${projectConfigExt}'
+`,
+	);
 
 	const skills = await loadFromPlugin<{ name: string }>(skillCapability.id, ctx());
 	const names = skills.map(skill => skill.name);
@@ -189,7 +209,12 @@ test("effective extensions replace persisted roots for overlays and runtime over
 	const overrideExt = path.join(tempDir, "override-extension");
 	buildExtensionPackage(persistedExt, "persisted-skill");
 	buildExtensionPackage(overrideExt, "override-skill");
-	writeFile(path.join(project, ".omp", "config.yml"), `extensions:\n  - "${persistedExt}"\n`);
+	writeFile(
+		path.join(project, ".ohmg", "config.yml"),
+		`extensions:
+  - '${persistedExt}'
+`,
+	);
 
 	const context: LoadContext = {
 		...ctx(),
@@ -211,8 +236,13 @@ test("effective extensions replace persisted roots for overlays and runtime over
 test("empty project config.yml#extensions suppresses user roots", async () => {
 	const userExt = path.join(tempDir, "user-extension");
 	buildExtensionPackage(userExt, "user-skill");
-	writeFile(path.join(home, ".omp", "agent", "config.yml"), `extensions:\n  - "${userExt}"\n`);
-	writeFile(path.join(project, ".omp", "config.yml"), "extensions: []\n");
+	writeFile(
+		path.join(home, ".ohmg", "agent", "config.yml"),
+		`extensions:
+  - '${userExt}'
+`,
+	);
+	writeFile(path.join(project, ".ohmg", "config.yml"), "extensions: []\n");
 
 	const skills = await loadFromPlugin<{ name: string }>(skillCapability.id, ctx());
 	expect(skills.map(skill => skill.name)).not.toContain("user-skill");
@@ -221,8 +251,8 @@ test("empty project config.yml#extensions suppresses user roots", async () => {
 test("user YAML config suppresses its legacy settings.json migration source", async () => {
 	const legacyExt = path.join(tempDir, "legacy-extension");
 	buildExtensionPackage(legacyExt, "legacy-skill");
-	writeFile(path.join(home, ".omp", "agent", "settings.json"), JSON.stringify({ extensions: [legacyExt] }));
-	writeFile(path.join(home, ".omp", "agent", "config.yml"), "theme:\n  dark: default\n");
+	writeFile(path.join(home, ".ohmg", "agent", "settings.json"), JSON.stringify({ extensions: [legacyExt] }));
+	writeFile(path.join(home, ".ohmg", "agent", "config.yml"), "theme:\n  dark: default\n");
 
 	const skills = await loadFromPlugin<{ name: string }>(skillCapability.id, ctx());
 	expect(skills.map(skill => skill.name)).not.toContain("legacy-skill");
@@ -260,15 +290,15 @@ test("explicit-only CLI roots replace stale state and exclude every ambient pack
 	const stale = path.join(tempDir, "stale-extension");
 	const projectExt = path.join(tempDir, "project-extension");
 	const userExt = path.join(tempDir, "user-extension");
-	const installed = path.join(home, ".omp", "plugins", "node_modules", "installed-extension");
+	const installed = path.join(home, ".ohmg", "plugins", "node_modules", "installed-extension");
 	buildExtensionPackage(stale, "stale-skill");
 	buildExtensionPackage(projectExt, "project-skill");
 	buildExtensionPackage(userExt, "user-skill");
 	buildExtensionPackage(installed, "installed-skill");
-	writeFile(path.join(project, ".omp", "settings.json"), JSON.stringify({ extensions: [projectExt] }));
-	writeFile(path.join(home, ".omp", "agent", "settings.json"), JSON.stringify({ extensions: [userExt] }));
+	writeFile(path.join(project, ".ohmg", "settings.json"), JSON.stringify({ extensions: [projectExt] }));
+	writeFile(path.join(home, ".ohmg", "agent", "settings.json"), JSON.stringify({ extensions: [userExt] }));
 	writeFile(
-		path.join(home, ".omp", "plugins", "package.json"),
+		path.join(home, ".ohmg", "plugins", "package.json"),
 		JSON.stringify({ name: "omp-plugins", dependencies: { "installed-extension": "1.0.0" } }),
 	);
 
@@ -296,15 +326,15 @@ test("explicit-only CLI roots replace stale state and exclude every ambient pack
 test("invocation scopes isolate concurrent SDK roots and merge ambient roots only when requested", async () => {
 	const otherExplicit = path.join(tempDir, "other-explicit-extension");
 	const projectExt = path.join(tempDir, "project-extension");
-	const installed = path.join(home, ".omp", "plugins", "node_modules", "installed-extension");
+	const installed = path.join(home, ".ohmg", "plugins", "node_modules", "installed-extension");
 	const staleCli = path.join(tempDir, "stale-cli-extension");
 	buildExtensionPackage(otherExplicit, "other-explicit-skill");
 	buildExtensionPackage(projectExt, "project-skill");
 	buildExtensionPackage(installed, "installed-skill");
 	buildExtensionPackage(staleCli, "stale-cli-skill");
-	writeFile(path.join(project, ".omp", "settings.json"), JSON.stringify({ extensions: [projectExt] }));
+	writeFile(path.join(project, ".ohmg", "settings.json"), JSON.stringify({ extensions: [projectExt] }));
 	writeFile(
-		path.join(home, ".omp", "plugins", "package.json"),
+		path.join(home, ".ohmg", "plugins", "package.json"),
 		JSON.stringify({ name: "omp-plugins", dependencies: { "installed-extension": "1.0.0" } }),
 	);
 	injectOmpExtensionCliRoots([staleCli], home, project);
@@ -369,12 +399,12 @@ test("explicit-only mode drops the configured lane and installed roots (#9769)",
 	// still carries a nonempty configured array (round-8 leak).
 	const explicitExt = path.join(tempDir, "explicit-extension");
 	const configuredExt = path.join(tempDir, "configured-extension");
-	const installed = path.join(home, ".omp", "plugins", "node_modules", "installed-extension");
+	const installed = path.join(home, ".ohmg", "plugins", "node_modules", "installed-extension");
 	buildExtensionPackage(explicitExt, "explicit-skill");
 	buildExtensionPackage(configuredExt, "configured-skill");
 	buildExtensionPackage(installed, "installed-skill");
 	writeFile(
-		path.join(home, ".omp", "plugins", "package.json"),
+		path.join(home, ".ohmg", "plugins", "package.json"),
 		JSON.stringify({ name: "omp-plugins", dependencies: { "installed-extension": "1.0.0" } }),
 	);
 
@@ -432,14 +462,19 @@ test("scopeless reload with session roots equals the construction-time scoped lo
 	// 2×2 grid of explicit-only × has-configured.
 	const explicitExt = path.join(tempDir, "invariant-explicit");
 	const configuredExt = path.join(tempDir, "invariant-configured");
-	const installed = path.join(home, ".omp", "plugins", "node_modules", "invariant-installed");
+	const installed = path.join(home, ".ohmg", "plugins", "node_modules", "invariant-installed");
 	buildExtensionPackage(explicitExt, "invariant-explicit-skill");
 	buildExtensionPackage(configuredExt, "invariant-configured-skill");
 	buildExtensionPackage(installed, "invariant-installed-skill");
 	// Persist the configured lane at project scope so its provenance resolves to `project`.
-	writeFile(path.join(project, ".omp", "config.yml"), `extensions:\n  - "${configuredExt}"\n`);
 	writeFile(
-		path.join(home, ".omp", "plugins", "package.json"),
+		path.join(project, ".ohmg", "config.yml"),
+		`extensions:
+  - '${configuredExt}'
+`,
+	);
+	writeFile(
+		path.join(home, ".ohmg", "plugins", "package.json"),
 		JSON.stringify({ name: "omp-plugins", dependencies: { "invariant-installed": "1.0.0" } }),
 	);
 
@@ -478,7 +513,7 @@ test("loadCapability extensionRoots surfaces override extensions outside any sco
 test("file-extension entrypoints contribute zero sub-surface (the file has no siblings to scan)", async () => {
 	const standaloneFile = path.join(tempDir, "standalone.ts");
 	fs.writeFileSync(standaloneFile, "export default function (_pi) {}\n");
-	writeFile(path.join(project, ".omp", "settings.json"), JSON.stringify({ extensions: [standaloneFile] }));
+	writeFile(path.join(project, ".ohmg", "settings.json"), JSON.stringify({ extensions: [standaloneFile] }));
 
 	const skills = await loadFromPlugin<{ name: string }>(skillCapability.id, ctx());
 	expect(skills).toHaveLength(0);
@@ -490,7 +525,7 @@ test("relative paths in settings resolve against the project cwd", async () => {
 	const target = path.join(project, relative);
 	fs.mkdirSync(path.dirname(target), { recursive: true });
 	fs.cpSync(ext, target, { recursive: true });
-	writeFile(path.join(project, ".omp", "settings.json"), JSON.stringify({ extensions: [`./${relative}`] }));
+	writeFile(path.join(project, ".ohmg", "settings.json"), JSON.stringify({ extensions: [`./${relative}`] }));
 
 	const skills = await loadFromPlugin<{ name: string }>(skillCapability.id, ctx());
 	expect(skills.map(s => s.name)).toContain("my-skill");
@@ -501,7 +536,7 @@ test(".mcp.json with bare entries (no command/url) records a warning and is skip
 		path.join(ext, ".mcp.json"),
 		JSON.stringify({ mcpServers: { broken: {}, ok: { command: "x", args: [] } } }),
 	);
-	writeFile(path.join(project, ".omp", "settings.json"), JSON.stringify({ extensions: [ext] }));
+	writeFile(path.join(project, ".ohmg", "settings.json"), JSON.stringify({ extensions: [ext] }));
 
 	const result = await pluginProvider(mcpCapability.id).load(ctx());
 	expect(result.items.map(s => (s as { name: string }).name)).toEqual(["ok"]);
@@ -540,7 +575,7 @@ test(".mcp.json expands environment placeholders recursively", async () => {
 				},
 			}),
 		);
-		writeFile(path.join(project, ".omp", "settings.json"), JSON.stringify({ extensions: [ext] }));
+		writeFile(path.join(project, ".ohmg", "settings.json"), JSON.stringify({ extensions: [ext] }));
 
 		const servers = await loadFromPlugin<{
 			name: string;
@@ -581,7 +616,7 @@ test("relative path-like command and cwd resolve against the plugin config direc
 			},
 		}),
 	);
-	writeFile(path.join(project, ".omp", "settings.json"), JSON.stringify({ extensions: [ext] }));
+	writeFile(path.join(project, ".ohmg", "settings.json"), JSON.stringify({ extensions: [ext] }));
 
 	const servers = await loadFromPlugin<{ name: string; command?: string; cwd?: string }>(mcpCapability.id, ctx());
 	const local = servers.find(s => s.name === "local");
@@ -606,7 +641,7 @@ test("path-like command stays rooted at the plugin package root even with a subd
 			},
 		}),
 	);
-	writeFile(path.join(project, ".omp", "settings.json"), JSON.stringify({ extensions: [ext] }));
+	writeFile(path.join(project, ".ohmg", "settings.json"), JSON.stringify({ extensions: [ext] }));
 
 	const servers = await loadFromPlugin<{ name: string; command?: string; cwd?: string }>(mcpCapability.id, ctx());
 	const local = servers.find(s => s.name === "local");
@@ -617,7 +652,7 @@ test("path-like command stays rooted at the plugin package root even with a subd
 test("installed plugins under `<plugins>/node_modules/` are surfaced (e.g. via `omp plugin link`/`install`)", async () => {
 	// Simulate what `plugin install` / `plugin link` produces: a plugins root
 	// with `package.json#dependencies` and a populated `node_modules/<pkg>/`.
-	const pluginsDir = path.join(home, ".omp", "plugins");
+	const pluginsDir = path.join(home, ".ohmg", "plugins");
 	const nodeModules = path.join(pluginsDir, "node_modules");
 	const installed = path.join(nodeModules, "my-installed-ext");
 	fs.mkdirSync(installed, { recursive: true });
@@ -636,12 +671,12 @@ test("installed plugins under `<plugins>/node_modules/` are surfaced (e.g. via `
 });
 
 test("project-scoped installed plugins surface project-level sub-discovery", async () => {
-	const pluginsDir = path.join(project, ".omp", "plugins");
+	const pluginsDir = path.join(project, ".ohmg", "plugins");
 	const installed = path.join(pluginsDir, "node_modules", "my-project-ext");
 	fs.mkdirSync(installed, { recursive: true });
 	fs.cpSync(ext, installed, { recursive: true });
 	writeFile(
-		path.join(pluginsDir, "omp-plugins.lock.json"),
+		path.join(pluginsDir, "ohmg-plugins.lock.json"),
 		JSON.stringify({
 			plugins: { "my-project-ext": { version: "1.0.0", enabled: true, enabledFeatures: null } },
 			settings: {},
@@ -657,7 +692,7 @@ test("project-scoped installed plugins surface project-level sub-discovery", asy
 });
 
 test("disabled installed plugins do not contribute sub-discovery", async () => {
-	const pluginsDir = path.join(home, ".omp", "plugins");
+	const pluginsDir = path.join(home, ".ohmg", "plugins");
 	const installed = path.join(pluginsDir, "node_modules", "my-disabled-ext");
 	fs.mkdirSync(installed, { recursive: true });
 	fs.cpSync(ext, installed, { recursive: true });
@@ -666,7 +701,7 @@ test("disabled installed plugins do not contribute sub-discovery", async () => {
 		JSON.stringify({ name: "omp-plugins", dependencies: { "my-disabled-ext": "1.0.0" } }),
 	);
 	writeFile(
-		path.join(pluginsDir, "omp-plugins.lock.json"),
+		path.join(pluginsDir, "ohmg-plugins.lock.json"),
 		JSON.stringify({ plugins: { "my-disabled-ext": { enabled: false } }, settings: {} }),
 	);
 
@@ -681,7 +716,7 @@ test("linked plugins (only in lockfile, not in package.json#dependencies) are su
 	// still find the package — otherwise the documented `omp install
 	// ./local-extension` workflow leaves the sibling skills/hooks/tools
 	// invisible (see PR #1498 review).
-	const pluginsDir = path.join(home, ".omp", "plugins");
+	const pluginsDir = path.join(home, ".ohmg", "plugins");
 	const nodeModules = path.join(pluginsDir, "node_modules");
 	fs.mkdirSync(nodeModules, { recursive: true });
 	const linkTarget = path.join(nodeModules, "my-linked-ext");
@@ -689,7 +724,7 @@ test("linked plugins (only in lockfile, not in package.json#dependencies) are su
 	// Intentionally NO `<plugins>/package.json` — matches a fresh `plugin link`
 	// against a setup that has never run `plugin install`.
 	writeFile(
-		path.join(pluginsDir, "omp-plugins.lock.json"),
+		path.join(pluginsDir, "ohmg-plugins.lock.json"),
 		JSON.stringify({
 			plugins: { "my-linked-ext": { version: "1.0.0", enabled: true, enabledFeatures: null } },
 			settings: {},

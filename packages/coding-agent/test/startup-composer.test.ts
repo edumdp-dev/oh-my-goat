@@ -415,7 +415,7 @@ describe("Composer prepaint", () => {
 			preferences: config,
 			terminal,
 			welcome: {
-				version: "9.9.9",
+				version: "0.0.1",
 				recentSessions: [{ name: "prior work", timeAgo: "5m ago" }],
 			},
 		});
@@ -429,8 +429,8 @@ describe("Composer prepaint", () => {
 			.map(r => Bun.stripANSI(r))
 			.join("\n");
 		expect(output).toContain("Welcome back!");
-		expect(output).toContain("omp");
-		expect(output).toContain("9.9.9");
+		expect(output).toContain("ohmygoat v0.0.1 · made by dudu");
+		expect(output).toContain("⣶⣶⣶⣶");
 		expect(output).toContain("prior work");
 		expect(output).not.toContain("Starting OMP");
 		expect(output).toContain("╭");

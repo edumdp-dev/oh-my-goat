@@ -3,6 +3,7 @@ import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import { getThemeByName } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
+import { SYMBOL_PRESETS } from "@oh-my-pi/pi-coding-agent/modes/theme/symbols";
 import { getAgentDir, getCustomThemesDir, removeWithRetries, setAgentDir } from "@oh-my-pi/pi-utils";
 
 const DARK_THEME_PATH = path.join(import.meta.dir, "..", "src", "modes", "theme", "dark.json");
@@ -23,6 +24,12 @@ afterEach(async () => {
 	tempAgentDir = undefined;
 });
 
+it("uses the downstream monospace brand glyph in every compatible preset key", () => {
+	expect(SYMBOL_PRESETS.unicode["icon.omp"]).toBe("g");
+	expect(SYMBOL_PRESETS.nerd["icon.omp"]).toBe("g");
+	expect(SYMBOL_PRESETS.ascii["icon.omp"]).toBe("g");
+});
+
 it("uses the Nerd Fonts v3 session and C# icons", async () => {
 	originalAgentDir = getAgentDir();
 	originalAgentDirEnv = process.env.PI_CODING_AGENT_DIR;
@@ -39,6 +46,7 @@ it("uses the Nerd Fonts v3 session and C# icons", async () => {
 	const theme = await getThemeByName(customThemeName);
 	expect(theme?.symbol("icon.session")).toBe("\u{f0051}");
 	expect(theme?.getLangIcon("csharp")).toBe("\u{e7b2}");
+	expect(theme?.symbol("icon.omp")).toBe("g");
 });
 
 it("resolves subscription and advisor icons in Nerd Font mode", async () => {

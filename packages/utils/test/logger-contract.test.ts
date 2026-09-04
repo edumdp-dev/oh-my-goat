@@ -3,7 +3,7 @@ import * as crypto from "node:crypto";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-
+import { APP_NAME, CONFIG_DIR_NAME } from "@oh-my-pi/pi-utils/dirs";
 const fixtureDir = path.join(import.meta.dir, "fixtures");
 const probePath = path.join(fixtureDir, "logger-contract-probe.ts");
 const preloadPath = path.join(fixtureDir, "logger-fixed-date-preload.ts");
@@ -48,7 +48,7 @@ async function runScenario(scenario: string): Promise<ScenarioResult> {
 			env: {
 				...process.env,
 				HOME: primaryDir,
-				PI_CONFIG_DIR: ".omp",
+				PI_CONFIG_DIR: `.${APP_NAME}-logger-test`,
 				OMP_PROFILE: "",
 				PI_PROFILE: "",
 				XDG_DATA_HOME: "",
@@ -70,14 +70,15 @@ async function runScenario(scenario: string): Promise<ScenarioResult> {
 	return { pid: proc.pid, root, primaryDir, secondaryDir, resultPath, stdout, stderr };
 }
 
-async function logFileNames(directory: string): Promise<string[]> {
+async function logFileNames(directory: string, pid?: number): Promise<string[]> {
 	return (await fs.readdir(directory))
-		.filter(name => /^omp\.\d{4}-\d{2}-\d{2}\.\d+\.log(?:\.\d+)?$/.test(name))
+		.filter(name => new RegExp(`^${APP_NAME}\\.\\d{4}-\\d{2}-\\d{2}\\.\\d+\\.log(?:\\.\\d+)?$`).test(name))
+		.filter(name => (pid === undefined ? true : name.includes(`.${pid}.`)))
 		.sort();
 }
 
-async function readSingleLog(directory: string): Promise<{ name: string; text: string }> {
-	const names = await logFileNames(directory);
+async function readSingleLog(directory: string, pid?: number): Promise<{ name: string; text: string }> {
+	const names = await logFileNames(directory, pid);
 	expect(names).toHaveLength(1);
 	const name = names[0];
 	if (!name) throw new Error("expected one log file");
@@ -100,7 +101,7 @@ describe("central logger byte contract", () => {
 		expect(result.stdout).toBe("");
 		expect(result.stderr).toBe("");
 		const log = await readSingleLog(result.primaryDir);
-		expect(log.name).toBe(`omp.2026-01-01.${result.pid}.log`);
+		expect(log.name).toBe(`${APP_NAME}.2026-01-01.${result.pid}.log`);
 		const expected = [
 			expectedLine(result.pid, "error", "level-error", { ordinal: 1 }),
 			expectedLine(result.pid, "warn", "level-warn", { ordinal: 2 }),
@@ -130,7 +131,9 @@ describe("central logger byte contract", () => {
 		].join("");
 		expect(log.text).toBe(expected);
 		expect(log.text.endsWith(os.EOL)).toBe(true);
-		expect(await fs.readFile(path.join(result.primaryDir, `.omp.${result.pid}-audit.json`), "utf8")).not.toBe("");
+		expect(
+			await fs.readFile(path.join(result.primaryDir, `${CONFIG_DIR_NAME}.${result.pid}-audit.json`), "utf8"),
+		).not.toBe("");
 	});
 
 	test("treats Winston format tokens as a splat branch and omits context", async () => {
@@ -178,8 +181,12 @@ describe("central logger transport lifecycle", () => {
 		const result = await runScenario("default-file");
 		expect(result.stdout).toBe("");
 		expect(result.stderr).toBe("");
-		const defaultLogsDir = path.join(result.primaryDir, ".omp", "logs");
-		const log = await readSingleLog(defaultLogsDir);
+		const configDirName = `.${APP_NAME}-logger-test`;
+		const homeLogsDir = path.join(os.homedir(), configDirName, "logs");
+		const tempLogsDir = path.join(result.primaryDir, configDirName, "logs");
+		const dir = (await fs.stat(homeLogsDir).catch(() => null)) ? homeLogsDir : tempLogsDir;
+		const log = await readSingleLog(dir, result.pid);
+		expect(log.name.startsWith(`${APP_NAME}.`)).toBe(true);
 		expect(log.text).toBe(expectedLine(result.pid, "info", "mode-default", { mode: "default" }));
 	});
 
@@ -281,7 +288,7 @@ describe("DailyRotateFile option and retention contract", () => {
 		const result = await runScenario("date-retention");
 		expect(result.stdout).toBe("");
 		expect(result.stderr).toBe("");
-		const expectedNames = [2, 3, 4, 5, 6].map(day => `omp.2026-01-0${day}.${result.pid}.log`);
+		const expectedNames = [2, 3, 4, 5, 6].map(day => `${APP_NAME}.2026-01-0${day}.${result.pid}.log`);
 		expect(await logFileNames(result.primaryDir)).toEqual(expectedNames);
 		for (const [offset, name] of expectedNames.entries()) {
 			const day = offset + 2;
@@ -291,7 +298,7 @@ describe("DailyRotateFile option and retention contract", () => {
 			);
 		}
 
-		const auditPath = path.join(result.primaryDir, `.omp.${result.pid}-audit.json`);
+		const auditPath = path.join(result.primaryDir, `${CONFIG_DIR_NAME}.${result.pid}-audit.json`);
 		const audit = JSON.parse(await fs.readFile(auditPath, "utf8")) as AuditFile;
 		expect(audit.keep).toEqual({ days: false, amount: 5 });
 		expect(audit.auditLog).toBe(auditPath);
@@ -308,7 +315,7 @@ describe("DailyRotateFile option and retention contract", () => {
 		const result = await runScenario("size-rotation");
 		expect(result.stdout).toBe("");
 		expect(result.stderr).toBe("");
-		const baseName = `omp.2026-01-01.${result.pid}.log`;
+		const baseName = `${APP_NAME}.2026-01-01.${result.pid}.log`;
 		const rotatedName = `${baseName}.1`;
 		expect(await logFileNames(result.primaryDir)).toEqual([baseName, rotatedName]);
 		const basePath = path.join(result.primaryDir, baseName);
@@ -328,7 +335,7 @@ describe("DailyRotateFile option and retention contract", () => {
 			expectedLine(result.pid, "info", "rotation-trigger"),
 		);
 		const audit = JSON.parse(
-			await fs.readFile(path.join(result.primaryDir, `.omp.${result.pid}-audit.json`), "utf8"),
+			await fs.readFile(path.join(result.primaryDir, `${CONFIG_DIR_NAME}.${result.pid}-audit.json`), "utf8"),
 		) as AuditFile;
 		expect(audit.keep).toEqual({ days: false, amount: 5 });
 		expect(audit.files.map(file => path.basename(file.name))).toEqual([baseName, rotatedName]);

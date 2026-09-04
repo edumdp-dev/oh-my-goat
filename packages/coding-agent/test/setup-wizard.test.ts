@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, mock, vi } from "bun:test";
 import type { Model } from "@oh-my-pi/pi-ai";
 import { buildModel } from "@oh-my-pi/pi-catalog/build";
 import { runOnboardingSetup } from "@oh-my-pi/pi-coding-agent/commands/setup";
+import { GOAT_LOGO } from "@oh-my-pi/pi-coding-agent/modes/components/welcome";
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import {
 	ALL_SCENES,
@@ -411,6 +412,23 @@ describe("setup wizard short terminals", () => {
 			for (const label of ["Match terminal", "Titanium", "Light", "Colorblind colors", "ANSI-safe", "Browse all"]) {
 				expect(frame.some(line => line.includes(label))).toBe(true);
 			}
+		} finally {
+			nowSpy.mockRestore();
+			component.dispose();
+		}
+	});
+
+	it("shows the goat art in a tall setup scene without changing frame bounds", async () => {
+		await initTheme(false, "unicode", false, "titanium", "light");
+		const component = new SetupWizardComponent(shortTerminalCtx(40), [providersSetupScene]);
+		void component.run();
+		component.handleInput("\r");
+		const nowSpy = skipDissolve();
+		try {
+			const frame = component.render(80).map(line => Bun.stripANSI(line));
+			expect(frame).toHaveLength(40);
+			expect(frame.join("\n")).toContain(GOAT_LOGO[6].trim());
+			expect(frame.every(line => line.length <= 80)).toBe(true);
 		} finally {
 			nowSpy.mockRestore();
 			component.dispose();

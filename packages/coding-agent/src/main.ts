@@ -11,6 +11,7 @@ import { EventLoopKeepalive, type ThinkingLevel } from "@oh-my-pi/pi-agent-core"
 import type { ImageContent, Model } from "@oh-my-pi/pi-ai";
 import {
 	$env,
+	APP_NAME,
 	directoryIsMissing,
 	getLogPath,
 	getProjectDir,
@@ -18,6 +19,7 @@ import {
 	logger,
 	normalizePathForComparison,
 	postmortem,
+	PRODUCT_VERSION,
 	setInteractiveHost,
 	setProjectDir,
 	VERSION,
@@ -1419,7 +1421,7 @@ export async function runRootCommand(
 		const notifs: (InteractiveModeNotify | null)[] = [];
 
 		if (parsedArgs.version) {
-			writeStartupNotice(parsedArgs, `${VERSION}\n`);
+			writeStartupNotice(parsedArgs, `${APP_NAME}/${PRODUCT_VERSION}\n`);
 			process.exit(0);
 		}
 
@@ -2048,7 +2050,7 @@ export async function runRootCommand(
 				stopStartupWatchdog();
 				await runRpcMode(session, mode === "rpc-ui" ? setToolUIContext : undefined, subagentEventBus, rpcInput);
 			} else if (isInteractive) {
-				const versionCheckPromise = checkForNewVersion(VERSION).catch(() => undefined);
+				const versionCheckPromise = checkForNewVersion(PRODUCT_VERSION).catch(() => undefined);
 				const startupChangelog = await startupChangelogPromise;
 
 				const modelScopeNotification = buildModelScopeNotification(
@@ -2074,7 +2076,7 @@ export async function runRootCommand(
 					logger.endTiming();
 					await runInteractiveMode(
 						session,
-						VERSION,
+						PRODUCT_VERSION,
 						startupChangelog,
 						notifs,
 						versionCheckPromise,

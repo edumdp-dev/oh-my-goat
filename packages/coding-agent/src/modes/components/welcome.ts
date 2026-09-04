@@ -7,7 +7,7 @@ import {
 	visibleWidth,
 	wrapTextWithAnsi,
 } from "@oh-my-pi/pi-tui";
-import { APP_NAME } from "@oh-my-pi/pi-utils";
+import { DISPLAY_NAME, PRODUCT_BYLINE } from "@oh-my-pi/pi-utils";
 import { theme } from "../../modes/theme/theme";
 import tipsText from "./tips.txt" with { type: "text" };
 
@@ -136,7 +136,7 @@ export interface LspServerInfo {
 }
 
 /**
- * Premium welcome screen with block-based OMP logo and two-column layout.
+ * Premium welcome screen with a blue goat mark and responsive panel layout.
  */
 export class WelcomeComponent implements Component {
 	#animStart: number | null = null;
@@ -264,78 +264,50 @@ export class WelcomeComponent implements Component {
 	}
 
 	#renderLines(termWidth: number): string[] {
-		// Box dimensions - responsive with max width and small-terminal support
-		const maxWidth = 100;
+		const maxWidth = 120;
 		const boxWidth = Math.min(maxWidth, Math.max(0, termWidth - 2));
-		if (boxWidth < 4) {
-			return [];
-		}
-		const dualContentWidth = boxWidth - 3; // 3 = │ + │ + │
-		const preferredLeftCol = 26;
-		const minLeftCol = 12; // logo width
-		const minRightCol = 20;
-		// Dynamic model/provider labels are truncated inside the fixed column.
-		// Letting them influence the responsive breakpoint changes the box height
-		// when authoritative session data replaces the empty prepaint labels.
-		const leftMinContentWidth = Math.max(minLeftCol, visibleWidth("Welcome back!"));
-		const desiredLeftCol = Math.max(
-			Math.min(preferredLeftCol, Math.max(minLeftCol, Math.floor(dualContentWidth * 0.35))),
-			leftMinContentWidth,
-		);
-		const dualLeftCol =
-			dualContentWidth >= minRightCol + 1
-				? Math.min(desiredLeftCol, dualContentWidth - minRightCol)
-				: Math.max(1, dualContentWidth - 1);
-		const dualRightCol = Math.max(1, dualContentWidth - dualLeftCol);
-		const showRightColumn = dualLeftCol >= leftMinContentWidth && dualRightCol >= minRightCol;
-		const leftCol = showRightColumn ? dualLeftCol : boxWidth - 2;
-		const rightCol = showRightColumn ? dualRightCol : 0;
+		if (boxWidth < 4) return [];
 
-		// Logo: pick a frame from the intro animation if active, else the resting frame.
+		const innerWidth = boxWidth - 2;
+		const minPanelWidth = 40;
+		const showLogo = innerWidth >= GOAT_WIDTH;
+		const showSideBySide = showLogo && innerWidth >= GOAT_WIDTH + minPanelWidth + 1;
+		const leftCol = showSideBySide ? GOAT_WIDTH : innerWidth;
+		const rightCol = showSideBySide ? innerWidth - leftCol - 1 : innerWidth;
+		const panelWidth = showSideBySide ? rightCol : innerWidth;
 		const logoColored = this.#currentLogoFrame();
 
-		// Left column - centered content
-		const leftLines = [
-			"",
-			this.#centerText(theme.bold("Welcome back!"), leftCol),
-			"",
-			...logoColored.map(l => this.#centerText(l, leftCol)),
-			"",
-			this.#centerText(theme.fg("muted", this.modelName), leftCol),
-			this.#centerText(theme.fg("borderMuted", this.providerName), leftCol),
-		];
+		const brandLines = showLogo
+			? [
+					this.#centerText(theme.bold("Welcome back!"), leftCol),
+					...logoColored.map(line => this.#centerText(line, leftCol)),
+					this.#centerText(theme.fg("muted", this.modelName), leftCol),
+					this.#centerText(theme.fg("borderMuted", this.providerName), leftCol),
+				]
+			: ["", this.#centerText(theme.bold(GOAT_WORDMARK), innerWidth), ""];
 
-		// Right column separator
-		const separatorWidth = Math.max(0, rightCol - 2); // padding on each side
+		const separatorWidth = Math.max(0, panelWidth - 2);
 		const separator = ` ${theme.fg("dim", theme.boxRound.horizontal.repeat(separatorWidth))}`;
 
-		// Recent sessions content
 		const sessionLines: string[] = [];
 		if (this.recentSessions.length === 0) {
 			sessionLines.push(` ${theme.fg("dim", "No recent sessions")}`);
 		} else {
-			// Reserve width for the bullet prefix (" • ") and the trailing " (timeAgo)"
-			// so the relative time is never the part that gets truncated. The name
-			// absorbs whatever space is left.
 			const bulletPrefix = ` ${theme.md.bullet} `;
 			const prefixWidth = visibleWidth(bulletPrefix);
 			for (const session of this.recentSessions.slice(0, WELCOME_SESSION_SLOTS)) {
 				const timeSuffixRaw = ` (${session.timeAgo})`;
 				const timeWidth = visibleWidth(timeSuffixRaw);
-				const nameBudget = Math.max(1, rightCol - prefixWidth - timeWidth);
-				const nameVis = visibleWidth(session.name);
-				const name = nameVis > nameBudget ? truncateToWidth(session.name, nameBudget) : session.name;
+				const nameBudget = Math.max(1, panelWidth - prefixWidth - timeWidth);
+				const name =
+					visibleWidth(session.name) > nameBudget ? truncateToWidth(session.name, nameBudget) : session.name;
 				sessionLines.push(
 					`${theme.fg("dim", bulletPrefix)}${theme.fg("muted", name)}${theme.fg("dim", timeSuffixRaw)}`,
 				);
 			}
 		}
-		// Pad to the fixed slot count so the box height doesn't depend on session count.
-		while (sessionLines.length < WELCOME_SESSION_SLOTS) {
-			sessionLines.push("");
-		}
+		while (sessionLines.length < WELCOME_SESSION_SLOTS) sessionLines.push("");
 
-		// LSP servers content
 		const lspLines: string[] = [];
 		if (this.lspServers.length === 0) {
 			lspLines.push(` ${theme.fg("dim", "No LSP servers")}`);
@@ -353,13 +325,9 @@ export class WelcomeComponent implements Component {
 				lspLines.push(` ${icon} ${theme.fg("muted", server.name)} ${theme.fg("dim", exts)}`);
 			}
 		}
-		// Pad to the fixed slot count so the box height doesn't depend on server count.
-		while (lspLines.length < WELCOME_LSP_SLOTS) {
-			lspLines.push("");
-		}
+		while (lspLines.length < WELCOME_LSP_SLOTS) lspLines.push("");
 
-		// Right column
-		const rightLines = [
+		const panelLines = [
 			` ${theme.bold(theme.fg("accent", "Tips"))}`,
 			` ${theme.fg("dim", "#")}${theme.fg("muted", " for prompt actions")}`,
 			` ${theme.fg("dim", "/")}${theme.fg("muted", " for commands")}`,
@@ -374,7 +342,6 @@ export class WelcomeComponent implements Component {
 			"",
 		];
 
-		// Border characters (dim)
 		const hChar = theme.boxRound.horizontal;
 		const h = theme.fg("dim", hChar);
 		const v = theme.fg("dim", theme.boxRound.vertical);
@@ -382,44 +349,47 @@ export class WelcomeComponent implements Component {
 		const tr = theme.fg("dim", theme.boxRound.topRight);
 		const bl = theme.fg("dim", theme.boxRound.bottomLeft);
 		const br = theme.fg("dim", theme.boxRound.bottomRight);
-
 		const lines: string[] = [];
 
-		// Top border with embedded title
-		const title = ` ${APP_NAME} v${this.version} `;
+		const title = `${DISPLAY_NAME} v${this.version} · ${PRODUCT_BYLINE}`;
+		const titleDecorated = ` ${title} `;
 		const titlePrefixRaw = hChar.repeat(3);
-		const titleStyled = theme.fg("dim", titlePrefixRaw) + theme.fg("muted", title);
-		const titleVisLen = visibleWidth(titlePrefixRaw) + visibleWidth(title);
+		const titleStyled = theme.fg("dim", titlePrefixRaw) + theme.fg("muted", titleDecorated);
+		const titleVisLen = visibleWidth(titlePrefixRaw) + visibleWidth(titleDecorated);
 		const titleSpace = boxWidth - 2;
 		if (titleVisLen >= titleSpace) {
 			lines.push(tl + truncateToWidth(titleStyled, titleSpace) + tr);
 		} else {
-			const afterTitle = titleSpace - titleVisLen;
-			lines.push(tl + titleStyled + theme.fg("dim", hChar.repeat(afterTitle)) + tr);
+			lines.push(tl + titleStyled + theme.fg("dim", hChar.repeat(titleSpace - titleVisLen)) + tr);
 		}
 
-		// Content rows
-		const maxRows = showRightColumn ? Math.max(leftLines.length, rightLines.length) : leftLines.length;
-		for (let i = 0; i < maxRows; i++) {
-			const left = this.#fitToWidth(leftLines[i] ?? "", leftCol);
-			if (showRightColumn) {
-				const right = this.#fitToWidth(rightLines[i] ?? "", rightCol);
-				lines.push(v + left + v + right + v);
-			} else {
-				lines.push(v + left + v);
+		if (!showLogo) {
+			for (const line of brandLines) lines.push(v + this.#fitToWidth(line, innerWidth) + v);
+		} else if (showSideBySide) {
+			const maxRows = Math.max(brandLines.length, panelLines.length);
+			for (let i = 0; i < maxRows; i++) {
+				lines.push(
+					v +
+						this.#fitToWidth(brandLines[i] ?? "", leftCol) +
+						v +
+						this.#fitToWidth(panelLines[i] ?? "", rightCol) +
+						v,
+				);
+			}
+		} else {
+			for (const line of [...brandLines, ...panelLines]) {
+				lines.push(v + this.#fitToWidth(line, innerWidth) + v);
 			}
 		}
-		// Bottom border
-		if (showRightColumn) {
+
+		if (showSideBySide) {
 			lines.push(bl + h.repeat(leftCol) + theme.fg("dim", theme.boxRound.teeUp) + h.repeat(rightCol) + br);
 		} else {
-			lines.push(bl + h.repeat(leftCol) + br);
+			lines.push(bl + h.repeat(innerWidth) + br);
 		}
-
-		// Randomly picked tip, rendered directly beneath the box.
 		lines.push(...this.#renderTip(boxWidth));
 
-		return lines;
+		return lines.map(line => truncateToWidth(line, Math.max(0, termWidth)));
 	}
 
 	/**
@@ -483,18 +453,40 @@ export class WelcomeComponent implements Component {
 	}
 }
 
-/** Block-grid brand mark shared by the welcome and setup surfaces. */
-export const PI_LOGO = ["████████████", "   ██  ██   ", "   ██  ██   ", "   ▒▒  ██   ", "       ██   "];
+/** Blue goat mark shared by the welcome and setup surfaces. Loaded byte-exact from `.brand-tmp/goat-logo.txt`. */
+export const GOAT_LOGO = [
+	"⠀⠀⠀⠀⠀⠀⠀⠠⠴⠶⠾⠿⠿⠿⢶⣦⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+	"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⢿⣿⣆⠐⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+	"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠿⠿⠆⠹⠦⠀⠀⠀⠀⠀⠀⠀⠀",
+	"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣤⣤⣤⣀⠐⣶⣶⣶⣶⣶⣶⡀⢀⣀⣀⠀⠀⠀",
+	"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠻⢿⣿⡆⢹⡿⠻⢿⣿⣿⣷⠈⠿⠛⠁⠀⠀",
+	"⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣤⣴⣾⣷⣤⣉⣠⣾⣷⣦⣼⣿⣿⣿⣧⠀⠀⠀⠀⠀",
+	"⠀⣶⣶⣶⣶⣶⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣇⠀⠀⠀⠀",
+	"⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀",
+	"⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣛⠻⢧⣘⡷⠀⠀⠀",
+	"⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⠀⠀⣉⠛⠿⣷⣦⣌⠁⠀⠀⠀",
+	"⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⣠⠘⠀⠀⢹⣿⣶⣶⠀⠀⠀⠀⠀⠀",
+	"⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⠀⢺⣿⠀⠀⠀⠘⣿⣿⡟⠀⠀⠀⠀⠀⠀",
+	"⠀⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⠀⠀⠀⠀⠁⠀⠀⠀⠀⠻⡟⠃⠀⠀⠀⠀⠀⠀",
+	"⠀⠛⠛⠛⠛⠛⠛⠛⠛⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+] as const;
 
-/** Multi-stop palette for the diagonal gradient. */
+const PRODUCT_WORDS = DISPLAY_NAME.match(/^(oh)(my)(.+)$/i)?.slice(1) ?? [DISPLAY_NAME];
+export const GOAT_WORDMARK = PRODUCT_WORDS.map(word => {
+	const titleCase = word.charAt(0).toUpperCase() + word.slice(1);
+	return [...titleCase].join(" ");
+}).join("   ");
+const GOAT_WIDTH = Math.max(...GOAT_LOGO.map(line => visibleWidth(line)));
+
+/** Multi-stop blue palette for the diagonal gradient. */
 const GRADIENT_STOPS: ReadonlyArray<readonly [number, number, number]> = [
-	[248, 79, 204], // oklch(0.7 0.24 340)
-	[147, 98, 244], // oklch(0.62 0.21 295)
-	[0, 219, 228], // oklch(0.81 0.14 200)
+	[11, 98, 196],
+	[57, 167, 255],
+	[143, 230, 255],
 ];
 
-/** 256-color ramp fallback when truecolor isn't available. */
-const GRADIENT_RAMP_256 = [206, 170, 134, 99, 69, 74, 44];
+/** 256-color blue ramp fallback when truecolor isn't available. */
+const GRADIENT_RAMP_256 = [25, 27, 33, 39, 45, 51, 87, 123];
 
 /** Half-width of the shine highlight band, expressed in gradient-t units. */
 const SHINE_HALF_WIDTH = 0.18;
@@ -516,8 +508,7 @@ export function gradientEscape(t: number, shine?: ShineConfig): string {
 	const shineStrength = shine && shine.strength > 0 ? shine.strength : 0;
 	const shinePos = shine ? shine.pos : 0;
 	if (TERMINAL.trueColor) {
-		// 5-stop palette widens the visible color range and avoids the
-		// deep-blue valley a naive HSL lerp falls into.
+		// Interpolate across the downstream blue palette.
 		const stops = GRADIENT_STOPS;
 		const seg = t * (stops.length - 1);
 		const i = Math.min(stops.length - 2, Math.floor(seg));
@@ -570,8 +561,7 @@ export function gradientLogo(lines: readonly string[], phase = 0, shine?: ShineC
 				result += char;
 				continue;
 			}
-			// SVG's (0,0) → (1,1) gradient projects both normalized axes
-			// equally: top-right and bottom-left land on the purple midpoint.
+			// Project the diagonal equally across both normalized axes.
 			const base = (x / xSpan + y / ySpan) / 2;
 			const t = normalizedPhase === 0 ? base : (base + normalizedPhase) % 1;
 			result += gradientEscape(t, shine) + char + reset;
@@ -604,8 +594,8 @@ function introLogoFrame(progress: number): string[] {
 	const phase = ((((1 - eased) * INTRO_SWEEPS) % 1) + 1) % 1;
 	const shinePos = (((progress * INTRO_SHINE_TRAVERSALS) % 1) + 1) % 1;
 	const shineStrength = (1 - eased) ** 1.5;
-	return gradientLogo(PI_LOGO, phase, { strength: shineStrength, pos: shinePos });
+	return gradientLogo(GOAT_LOGO, phase, { strength: shineStrength, pos: shinePos });
 }
 
 /** Resting gradient frame, cached for re-renders outside of the intro. */
-const REST_FRAME = gradientLogo(PI_LOGO, 0);
+const REST_FRAME = gradientLogo(GOAT_LOGO, 0);

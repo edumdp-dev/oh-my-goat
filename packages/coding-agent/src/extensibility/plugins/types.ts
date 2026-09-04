@@ -119,7 +119,7 @@ export interface InstalledPlugin {
 }
 
 // =============================================================================
-// Runtime Config Types (stored in omp-plugins.lock.json)
+// Runtime Config Types (persisted through the runtime lock file)
 // =============================================================================
 
 /**
@@ -135,7 +135,7 @@ export interface PluginRuntimeState {
 }
 
 /**
- * Runtime configuration persisted to omp-plugins.lock.json.
+ * Runtime configuration persisted through the runtime lock file.
  * Tracks plugin states and settings across sessions.
  */
 export interface PluginRuntimeConfig {

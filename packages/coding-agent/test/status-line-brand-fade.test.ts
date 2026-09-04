@@ -1,10 +1,8 @@
 /**
- * Contract for the `pi` brand segment's working transition (port of rust
- * omp's status-band brand fade): idle renders the omp icon in the dim color;
- * a turn start swaps the glyph to a spinner + turn timer whose foreground
- * fades dim → accent over 450ms (never an instant color swap), and a turn end
- * fades back from the color currently on screen. Regression: the first cut of
- * the working brand swapped colors instantly with no tween.
+ * Contract for the compatibility-named `pi` brand segment's working
+ * transition: idle renders the downstream `g` icon in the dim color; a turn
+ * start swaps the glyph to a spinner + timer whose foreground fades dim →
+ * accent over 450ms, and a turn end fades back from the on-screen color.
  */
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
@@ -76,6 +74,16 @@ function makeComponent(): StatusLineComponent {
 }
 
 describe("status line brand fade", () => {
+	it("keeps the upstream segment id while rendering the downstream glyph", () => {
+		const component = makeComponent();
+		try {
+			expect(theme.icon.omp).toBe("g");
+			expect(Bun.stripANSI(component.renderBottomBar(80, "full"))).toContain("g ");
+		} finally {
+			component.dispose();
+		}
+	});
+
 	it("fades the brand from dim into the accent when a turn starts", () => {
 		let now = 1_000_000;
 		vi.spyOn(Date, "now").mockImplementation(() => now);
