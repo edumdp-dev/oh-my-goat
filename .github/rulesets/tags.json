@@ -1,0 +1,24 @@
+{
+  "name": "ohmg-release-tags",
+  "target": "tag",
+  "source_type": "Repository",
+  "enforcement": "active",
+  "_comment": "Apply via POST /repos/edumdp-dev/oh-my-goat/rulesets after the first green OhMyGoat CI / verify. Protects release tags: no delete, no retag.",
+  "conditions": {
+    "ref_name": {
+      "exclude": [],
+      "include": [
+        "refs/tags/ohmg-v*"
+      ]
+    }
+  },
+  "rules": [
+    {
+      "type": "deletion"
+    },
+    {
+      "type": "update"
+    }
+  ],
+  "applied_via": "POST /repos/edumdp-dev/oh-my-goat/rulesets (ruleset id 22244892)"
+}
