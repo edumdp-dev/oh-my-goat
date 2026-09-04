@@ -54,7 +54,8 @@ jobs:
       - name: CLI smoke
         run: bun run ci:test:smoke
       - name: Landing site build
+        working-directory: site
         run: |
           set -euo pipefail
-          bun --cwd site install --frozen-lockfile
-          bun --cwd site run build
+          bun install --frozen-lockfile
+          bun run build
